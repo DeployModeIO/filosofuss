@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Filosofuss">
+  <defs>
+    <linearGradient id="phiGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c9a96a" />
+      <stop offset="0.5" stop-color="#7c5cff" />
+      <stop offset="1" stop-color="#e0659f" />
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#7c5cff" stop-opacity="0.40" />
+      <stop offset="0.45" stop-color="#c9a96a" stop-opacity="0.20" />
+      <stop offset="1" stop-color="#07070f" stop-opacity="0" />
+    </radialGradient>
+    <filter id="softGlow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Fondo oscuro, cuadrado redondeado a sangre. -->
+  <rect width="512" height="512" rx="104" fill="#07070f" />
+  <!-- Resplandor radial detrás del símbolo. -->
+  <rect width="512" height="512" fill="url(#glow)" />
+
+  <!-- Φ: símbolo de la filosofía, con degradado y brillo suave. -->
+  <text
+    x="256" y="262"
+    text-anchor="middle"
+    dominant-baseline="central"
+    font-family="Cinzel, 'Playfair Display', serif"
+    font-weight="700"
+    font-size="300"
+    fill="url(#phiGrad)"
+    filter="url(#softGlow)"
+  >Φ</text>
+</svg>
