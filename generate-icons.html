@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Filosofuss — Generador de iconos PWA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #07070f;
+        --bg-2: #0e0e1a;
+        --gold: #c9a96a;
+        --violet: #7c5cff;
+        --rose: #e0659f;
+        --text: #e8e6f0;
+        --muted: #9a96b0;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+      body {
+        font-family: 'Inter', system-ui, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 48px 20px 64px;
+      }
+      .wrap { width: 100%; max-width: 720px; }
+      h1 {
+        font-family: 'Cinzel', serif;
+        font-weight: 700;
+        font-size: 30px;
+        margin: 0 0 6px;
+        background: linear-gradient(135deg, var(--gold), var(--violet), var(--rose));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .sub { color: var(--muted); font-size: 14px; margin: 0 0 28px; }
+      .preview {
+        display: flex;
+        gap: 22px;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        margin: 8px 0 32px;
+      }
+      .preview canvas {
+        width: 256px;
+        height: 256px;
+        border-radius: 18px;
+        box-shadow: 0 10px 40px rgba(124, 92, 255, 0.25);
+        background: var(--bg);
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        font-size: 16px;
+        padding: 15px 26px;
+        border-radius: 14px;
+        border: none;
+        cursor: pointer;
+        color: #07070f;
+        background: linear-gradient(135deg, var(--gold), var(--violet));
+        transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+        box-shadow: 0 6px 24px rgba(124, 92, 255, 0.35);
+      }
+      .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(124, 92, 255, 0.5); }
+      .btn:active { transform: translateY(0); }
+      .btn:disabled { opacity: 0.5; cursor: wait; }
+      .card {
+        background: var(--bg-2);
+        border: 1px solid rgba(201, 169, 106, 0.18);
+        border-radius: 16px;
+        padding: 22px 24px;
+        margin-top: 32px;
+      }
+      .card h2 {
+        font-family: 'Cinzel', serif;
+        font-size: 18px;
+        margin: 0 0 14px;
+        color: var(--gold);
+      }
+      .card ol { margin: 0; padding-left: 20px; line-height: 1.7; font-size: 14.5px; color: var(--text); }
+      .card code {
+        background: #15151f;
+        padding: 2px 7px;
+        border-radius: 6px;
+        font-size: 13px;
+        color: var(--rose);
+      }
+      .status { margin-top: 16px; font-size: 14px; color: var(--muted); min-height: 20px; }
+      .status.ok { color: #6ee0a0; }
+      .status.err { color: var(--rose); }
+      .row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Generador de iconos PWA — Filosofuss</h1>
+      <p class="sub">Dibuja el icono en canvas y descarga todos los PNG necesarios para el manifest y iOS.</p>
+
+      <div class="preview">
+        <canvas id="preview" width="256" height="256"></canvas>
+      </div>
+
+      <div class="row">
+        <button id="download" class="btn" disabled>⬇ Descargar todos los iconos</button>
+        <span class="status" id="status">Cargando fuente Cinzel…</span>
+      </div>
+
+      <div class="card">
+        <h2>Instrucciones</h2>
+        <ol>
+          <li>Pulsa <strong>«Descargar todos los iconos»</strong>. El navegador puede pedir permiso para varias descargas: acepta (algunos navegadores las agrupan y debes pulsar «Permitir»).</li>
+          <li>Guarda los 6 archivos en la carpeta <code>E:\Filosofuss\public\icons\</code> (créala si no existe).</li>
+          <li>Los archivos que necesitas son: <code>icon-192.png</code>, <code>icon-256.png</code>, <code>icon-512.png</code>, <code>icon-512-maskable.png</code>, <code>apple-touch-icon.png</code> y <code>favicon.png</code>.</li>
+          <li>Este paso debe hacerse <strong>antes</strong> de <code>npm run build</code>, porque Vite copia <code>public/</code> a <code>dist/</code> durante el build.</li>
+          <li>Puedes abrir este archivo haciendo doble clic sobre él: se abre en el navegador sin servidor.</li>
+        </ol>
+      </div>
+    </div>
+
+    <script>
+      // ===================================================================
+      // Dibujo del icono en canvas (mismo diseño que public/icon.svg).
+      // ===================================================================
+      function drawIcon(canvas, size, maskable) {
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        // Fondo oscuro a sangre (full bleed).
+        ctx.fillStyle = '#07070f';
+        ctx.fillRect(0, 0, size, size);
+
+        const cx = size / 2;
+        const cy = size / 2;
+        // Para maskable: el diseño se encoge al ~80% del centro (safe zone).
+        const designSize = size * (maskable ? 0.8 : 1.0);
+        const r = designSize / 2;
+
+        // Resplandor radial suave detrás del símbolo.
+        const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 0.95);
+        glow.addColorStop(0, 'rgba(124, 92, 255, 0.40)');
+        glow.addColorStop(0.45, 'rgba(201, 169, 106, 0.20)');
+        glow.addColorStop(1, 'rgba(7, 7, 15, 0)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, 0, size, size);
+
+        // Degradado del símbolo: oro -> violeta -> rosa (135°).
+        const grad = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r);
+        grad.addColorStop(0, '#c9a96a');
+        grad.addColorStop(0.5, '#7c5cff');
+        grad.addColorStop(1, '#e0659f');
+
+        // Φ con relleno degradado + brillo suave (shadow).
+        ctx.save();
+        ctx.shadowColor = 'rgba(124, 92, 255, 0.55)';
+        ctx.shadowBlur = size * 0.05;
+        ctx.fillStyle = grad;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = '700 ' + Math.round(designSize * 0.6) + "px Cinzel, 'Playfair Display', serif";
+        ctx.fillText('\u03A6', cx, cy + size * 0.015);
+        ctx.restore();
+      }
+
+      // Descarga un canvas como PNG con el nombre dado.
+      function downloadCanvas(size, filename, maskable) {
+        const c = document.createElement('canvas');
+        drawIcon(c, size, maskable);
+        const dataUrl = c.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+
+      const ICONS = [
+        { size: 192, name: 'icon-192.png', maskable: false },
+        { size: 256, name: 'icon-256.png', maskable: false },
+        { size: 512, name: 'icon-512.png', maskable: false },
+        { size: 512, name: 'icon-512-maskable.png', maskable: true },
+        { size: 180, name: 'apple-touch-icon.png', maskable: false },
+        { size: 32, name: 'favicon.png', maskable: false },
+      ];
+
+      const preview = document.getElementById('preview');
+      const btn = document.getElementById('download');
+      const status = document.getElementById('status');
+
+      async function init() {
+        try {
+          // Asegura que Cinzel esté cargada antes de dibujar.
+          await document.fonts.load('700 200px Cinzel');
+          await document.fonts.load('700 40px Cinzel');
+          await document.fonts.ready;
+        } catch (e) {
+          /* Si la fuente no carga, se usa el fallback serif. */
+        }
+        drawIcon(preview, 256, false);
+        btn.disabled = false;
+        status.textContent = 'Listo. Pulsa el botón para descargar los iconos.';
+        status.className = 'status ok';
+      }
+
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        status.textContent = 'Generando descargas… (acepta los permisos del navegador)';
+        status.className = 'status';
+        try {
+          for (let i = 0; i < ICONS.length; i++) {
+            const ic = ICONS[i];
+            downloadCanvas(ic.size, ic.name, ic.maskable);
+            // Pequeña pausa para que el navegador no bloquee descargas múltiples.
+            await new Promise((res) => setTimeout(res, 350));
+          }
+          status.textContent = 'Descarga completa. Guarda los archivos en public/icons/.';
+          status.className = 'status ok';
+        } catch (e) {
+          status.textContent = 'Error: ' + e.message;
+          status.className = 'status err';
+        } finally {
+          btn.disabled = false;
+        }
+      });
+
+      init();
+    </script>
+  </body>
+</html>

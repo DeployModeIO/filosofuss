@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Filosofuss</string>
+    <string name="title_activity_main">Filosofuss</string>
+    <string name="package_name">com.filosofuss.app</string>
+    <string name="custom_url_scheme">com.filosofuss.app</string>
+</resources>
