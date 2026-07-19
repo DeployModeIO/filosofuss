@@ -1665,6 +1665,33 @@ export function getQuoteById(id: string): Quote | undefined {
   return quoteById.get(id);
 }
 
+// Traducciones al inglés (generadas por scripts/translate-quotes-glm.mjs).
+import { quoteEnById } from "./quotesEn";
+
+/**
+ * Texto de una cita en el idioma solicitado.
+ * En inglés usa la traducción generada; si no existe, cae al texto en español.
+ */
+export function getQuoteText(quote: Quote, locale: "es" | "en"): string {
+  if (locale === "en") {
+    const en = quoteEnById[quote.id];
+    if (en?.text) return en.text;
+  }
+  return quote.text;
+}
+
+/**
+ * Obra/origen de una cita en el idioma solicitado.
+ * En inglés usa la traducción generada (si la tiene); si no, cae al source ES.
+ */
+export function getQuoteSource(quote: Quote, locale: "es" | "en"): string | undefined {
+  if (locale === "en") {
+    const en = quoteEnById[quote.id];
+    if (en?.source) return en.source;
+  }
+  return quote.source;
+}
+
 /**
  * Devuelve una cita aleatoria. Si se pasa `excludeId`, no devolverá esa cita
  * (salvo que sea la única disponible).

@@ -3,7 +3,7 @@ import type { MouseEvent, ReactNode } from 'react'
 import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import { Check, Copy, Heart, Quote as QuoteIcon, Share2, Volume2, Square } from 'lucide-react'
 import type { Philosopher, Quote } from '@/types'
-import { getPhilosopherById } from '@/data/quotes'
+import { getPhilosopherById, getQuoteSource, getQuoteText } from '@/data/quotes'
 import { cn, formatYear } from '@/lib/utils'
 import { useApp } from '@/context/AppContext'
 import { useNarration } from '@/context/NarrationContext'
@@ -70,7 +70,7 @@ export default function QuoteCard({
   showActions = true,
 }: QuoteCardProps) {
   const phil = philosopher ?? getPhilosopherById(quote.philosopherId)
-  const { isFavorite, toggleFavorite, t } = useApp()
+  const { isFavorite, toggleFavorite, t, locale } = useApp()
   const { activeQuoteId, isNarrating, toggle } = useNarration()
   const fav = isFavorite(quote.id)
   const narratingThis = isNarrating && activeQuoteId === quote.id
@@ -102,7 +102,7 @@ export default function QuoteCard({
     py.set(0)
   }
 
-  const attribution = () => `"${quote.text}" — ${phil?.name ?? t('card.anon')}`
+  const attribution = () => `"${getQuoteText(quote, locale)}" — ${phil?.name ?? t('card.anon')}`
 
   const copyToClipboard = async () => {
     try {
@@ -181,7 +181,7 @@ export default function QuoteCard({
             isFeatured && 'text-center italic',
           )}
         >
-          {quote.text}
+          {getQuoteText(quote, locale)}
         </blockquote>
 
         <div
@@ -194,7 +194,7 @@ export default function QuoteCard({
               {phil.era} · {phil.school} · {formatYear(phil.birthYear)}–{formatYear(phil.deathYear)}
             </span>
           )}
-          {quote.source && <span className="text-xs italic text-muted">— {quote.source}</span>}
+          {quote.source && <span className="text-xs italic text-muted">— {getQuoteSource(quote, locale)}</span>}
         </div>
 
         {!isCompact && quote.tags.length > 0 && (

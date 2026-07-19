@@ -9,9 +9,10 @@ import {
 } from 'react'
 import type { ReactNode } from 'react'
 import { getNarrationSrc, type VoiceLang, voiceLangs } from '@/data/voiceManifest'
-import { getQuoteById } from '@/data/quotes'
+import { getQuoteById, getQuoteText } from '@/data/quotes'
 import { useLocalStorage } from '@/lib/storage'
 import { useAudio } from '@/context/AudioContext'
+import { useApp } from '@/context/AppContext'
 
 export interface NarrationContextValue {
   /** id de la cita que se está narrando ahora, o null */
@@ -45,6 +46,13 @@ export function NarrationProvider({ children }: { children: ReactNode }) {
   const [isNarrating, setIsNarrating] = useState(false)
 
   const { pause, isPlaying } = useAudio()
+  const { locale } = useApp()
+
+  // Sincroniza el idioma de narración con el idioma de la UI (AppContext).
+  // Así, al pulsar ES/EN, el audio reproducido coincide con el texto mostrado.
+  useEffect(() => {
+    setLang(locale === 'en' ? 'en' : 'es')
+  }, [locale, setLang])
 
   // Refs para evitar closures obsoletas dentro de los manejadores.
   const activeQuoteIdRef = useRef<string | null>(null)
@@ -99,7 +107,7 @@ export function NarrationProvider({ children }: { children: ReactNode }) {
       if (!q) return false
 
       const synth = window.speechSynthesis
-      const utter = new SpeechSynthesisUtterance(q.text)
+      const utter = new SpeechSynthesisUtterance(getQuoteText(q, lang))
       utter.lang = lang === 'es' ? 'es-MX' : 'en-US'
       utter.rate = 0.85
       utter.pitch = 0.9

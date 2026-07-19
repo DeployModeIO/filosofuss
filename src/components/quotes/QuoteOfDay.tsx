@@ -5,6 +5,7 @@ import { useQuoteOfDay } from '@/hooks/useQuoteOfDay'
 import { formatYear } from '@/lib/utils'
 import { useNarration } from '@/context/NarrationContext'
 import { useApp } from '@/context/AppContext'
+import { getQuoteSource, getQuoteText } from '@/data/quotes'
 
 const prefersReducedMotion =
   typeof window !== 'undefined' &&
@@ -28,9 +29,9 @@ const word: Variants = prefersReducedMotion
 export default function QuoteOfDay() {
   const { quote, philosopher } = useQuoteOfDay()
   const { activeQuoteId, isNarrating, toggle } = useNarration()
-  const { t } = useApp()
+  const { t, locale } = useApp()
   const narratingThis = isNarrating && activeQuoteId === quote.id
-  const words = quote.text.split(' ')
+  const words = getQuoteText(quote, locale).split(' ')
 
   return (
     <section className="relative mx-auto flex w-full max-w-3xl flex-col items-center overflow-hidden px-4 py-16 text-center sm:py-24">
@@ -108,7 +109,7 @@ export default function QuoteOfDay() {
             {formatYear(philosopher.deathYear)}
           </span>
         )}
-        {quote.source && <span className="text-xs italic text-muted">— {quote.source}</span>}
+        {quote.source && <span className="text-xs italic text-muted">— {getQuoteSource(quote, locale)}</span>}
       </motion.div>
 
       {/* CTA */}
