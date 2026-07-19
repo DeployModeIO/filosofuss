@@ -187,4 +187,4 @@ Distribuido bajo la licencia **MIT**. Consulta el archivo `LICENSE` para más de
 
 </div>
 
-<!-- Narracion por voz con Edge TTS - deploy trigger -->
+<!-- redeploy i18n completo -->
