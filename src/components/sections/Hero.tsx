@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ArrowRight, ChevronDown, Quote, Sparkles, Users } from 'lucide-react'
 import { quotes } from '@/data/quotes'
 import { philosophers } from '@/data/philosophers'
+import { useApp } from '@/context/AppContext'
 
 const reduceMotion =
   typeof window !== 'undefined' &&
@@ -20,6 +21,7 @@ const item: Variants = {
 }
 
 export default function Hero() {
+  const { t } = useApp()
   return (
     <section className="relative flex min-h-[92vh] w-full items-center justify-center overflow-hidden px-5 py-24 sm:px-8">
       {/* Elementos decorativos */}
@@ -47,8 +49,7 @@ export default function Hero() {
           className="mb-6 inline-flex items-center gap-2 rounded-full border border-line-soft bg-glass px-4 py-1.5 text-xs font-medium uppercase tracking-[0.18em] text-muted sm:text-sm"
         >
           <Sparkles className="h-4 w-4 text-accent" />
-          Sabiduría eterna · {quotes.length} citas · {philosophers.length}{' '}
-          filósofos
+          {t('hero.meta', { n: quotes.length, m: philosophers.length })}
         </motion.p>
 
         <motion.h1
@@ -62,8 +63,7 @@ export default function Hero() {
           variants={item}
           className="mt-8 max-w-2xl font-serif text-xl italic text-muted sm:text-2xl"
         >
-          Donde la filosofía cobra vida. Sumérgete en los pensamientos que
-          dieron forma a la humanidad.
+          {t('hero.subtitle')}
         </motion.p>
 
         <motion.div
@@ -71,12 +71,12 @@ export default function Hero() {
           className="mt-10 flex flex-col items-center gap-4 sm:flex-row"
         >
           <Link to="/explorar" className="btn-primary text-base">
-            Explorar citas
+            {t('hero.exploreQuotes')}
             <ArrowRight className="h-5 w-5" />
           </Link>
           <Link to="/filosofos" className="btn-ghost text-base">
             <Users className="h-5 w-5" />
-            Conocer a los filósofos
+            {t('hero.meetPhilosophers')}
           </Link>
         </motion.div>
       </motion.div>

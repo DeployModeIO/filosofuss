@@ -4,6 +4,7 @@ import { Quote as QuoteIcon, Volume2, Square } from 'lucide-react'
 import { useQuoteOfDay } from '@/hooks/useQuoteOfDay'
 import { formatYear } from '@/lib/utils'
 import { useNarration } from '@/context/NarrationContext'
+import { useApp } from '@/context/AppContext'
 
 const prefersReducedMotion =
   typeof window !== 'undefined' &&
@@ -27,6 +28,7 @@ const word: Variants = prefersReducedMotion
 export default function QuoteOfDay() {
   const { quote, philosopher } = useQuoteOfDay()
   const { activeQuoteId, isNarrating, toggle } = useNarration()
+  const { t } = useApp()
   const narratingThis = isNarrating && activeQuoteId === quote.id
   const words = quote.text.split(' ')
 
@@ -64,7 +66,7 @@ export default function QuoteOfDay() {
           className="h-px w-8 bg-gradient-to-r from-transparent to-accent"
         />
         <span className="font-sans text-xs font-semibold uppercase tracking-[0.3em] text-accent">
-          Cita del día
+          {t('qod.label')}
         </span>
         <span
           aria-hidden="true"
@@ -97,9 +99,9 @@ export default function QuoteOfDay() {
         transition={{ delay: 0.6, duration: 0.5 }}
         className="relative z-10 mt-8 flex flex-col items-center gap-1"
       >
-        <span className="font-display text-xl text-accent">
-          {philosopher?.name ?? 'Anónimo'}
-        </span>
+          <span className="font-display text-xl text-accent">
+           {philosopher?.name ?? t('qod.anon')}
+          </span>
         {philosopher && (
           <span className="text-sm text-muted">
             {philosopher.era} · {philosopher.school} · {formatYear(philosopher.birthYear)}–
@@ -118,16 +120,16 @@ export default function QuoteOfDay() {
       >
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link to="/explorar" className="btn-primary">
-            Explorar más sabiduría
+            {t('qod.cta')}
           </Link>
           <button
             type="button"
             onClick={() => toggle(quote.id)}
-            aria-label={narratingThis ? 'Detener narración' : 'Escuchar la cita del día'}
+            aria-label={narratingThis ? t('qod.stop') : t('qod.listen')}
             className="btn-ghost inline-flex items-center gap-2"
           >
             {narratingThis ? <Square size={18} aria-hidden="true" /> : <Volume2 size={18} aria-hidden="true" />}
-            {narratingThis ? 'Detener' : 'Escuchar'}
+            {narratingThis ? t('qod.stop') : t('qod.listenShort')}
           </button>
         </div>
       </motion.div>

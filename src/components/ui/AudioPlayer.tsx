@@ -12,6 +12,7 @@ import {
   X,
 } from 'lucide-react'
 import { useAudio } from '@/context/AudioContext'
+import { useApp } from '@/context/AppContext'
 import { tracks } from '@/data/tracks'
 import { cn } from '@/lib/utils'
 
@@ -91,6 +92,7 @@ export default function AudioPlayer() {
     setVolume,
     toggleMute,
   } = useAudio()
+  const { t } = useApp()
   const [expanded, setExpanded] = useState(false)
 
   const progress =
@@ -103,7 +105,7 @@ export default function AudioPlayer() {
       <div className="flex items-center gap-2">
         {isPlaying && <Equalizer />}
         <IconButton
-          label={isPlaying ? 'Pausar música' : 'Reproducir música'}
+          label={isPlaying ? t('audio.pause') : t('audio.play')}
           onClick={togglePlay}
           className={cn(
             'glass-strong grid h-12 w-12 place-items-center rounded-full text-content transition-colors duration-300 hover:text-accent focus-visible:text-accent',
@@ -117,7 +119,7 @@ export default function AudioPlayer() {
           )}
         </IconButton>
         <IconButton
-          label={expanded ? 'Cerrar reproductor' : 'Abrir reproductor'}
+          label={expanded ? t('audio.close') : t('audio.open')}
           onClick={() => setExpanded((v) => !v)}
           className={cn(
             'glass-strong grid h-10 w-10 place-items-center rounded-full text-content transition-colors duration-300 hover:text-accent focus-visible:text-accent',
@@ -137,7 +139,7 @@ export default function AudioPlayer() {
           <motion.div
             key="audio-panel"
             role="dialog"
-            aria-label="Reproductor de música ambiente"
+            aria-label={t('audio.aria')}
             className="glass-strong overflow-hidden rounded-2xl p-4 shadow-card sm:w-80"
             initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8, height: 0 }}
             animate={
@@ -171,14 +173,14 @@ export default function AudioPlayer() {
             {/* Transporte */}
             <div className="mb-3 flex items-center justify-center gap-3">
               <IconButton
-                label="Pista anterior"
+                label={t('audio.prev')}
                 onClick={prev}
                 className="grid h-9 w-9 place-items-center rounded-full text-muted transition-colors hover:text-accent"
               >
                 <SkipBack size={18} aria-hidden="true" />
               </IconButton>
-              <IconButton
-                label={isPlaying ? 'Pausar música' : 'Reproducir música'}
+               <IconButton
+                label={isPlaying ? t('audio.pause') : t('audio.play')}
                 onClick={togglePlay}
                 className="grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-accent to-accent-2 text-[#0a0a12] shadow-glow transition-transform duration-200 hover:scale-105"
               >
@@ -189,7 +191,7 @@ export default function AudioPlayer() {
                 )}
               </IconButton>
               <IconButton
-                label="Siguiente pista"
+                label={t('audio.next')}
                 onClick={next}
                 className="grid h-9 w-9 place-items-center rounded-full text-muted transition-colors hover:text-accent"
               >
@@ -200,7 +202,7 @@ export default function AudioPlayer() {
             {/* Volumen */}
             <div className="mb-1 flex items-center gap-2">
               <IconButton
-                label={isMuted || volume === 0 ? 'Activar sonido' : 'Silenciar'}
+                label={isMuted || volume === 0 ? t('audio.unmute') : t('audio.mute')}
                 onClick={toggleMute}
                 className="grid h-8 w-8 place-items-center rounded-full text-muted transition-colors hover:text-accent"
               >
@@ -217,7 +219,7 @@ export default function AudioPlayer() {
                 step={0.01}
                 value={sliderValue}
                 onChange={(e) => setVolume(parseFloat(e.target.value))}
-                aria-label="Volumen"
+                aria-label={t('audio.volume')}
                 className="h-1 w-full cursor-pointer"
                 style={{ accentColor: 'var(--accent)' }}
               />

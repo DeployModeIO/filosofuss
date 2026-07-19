@@ -70,7 +70,7 @@ export default function QuoteCard({
   showActions = true,
 }: QuoteCardProps) {
   const phil = philosopher ?? getPhilosopherById(quote.philosopherId)
-  const { isFavorite, toggleFavorite } = useApp()
+  const { isFavorite, toggleFavorite, t } = useApp()
   const { activeQuoteId, isNarrating, toggle } = useNarration()
   const fav = isFavorite(quote.id)
   const narratingThis = isNarrating && activeQuoteId === quote.id
@@ -102,7 +102,7 @@ export default function QuoteCard({
     py.set(0)
   }
 
-  const attribution = () => `"${quote.text}" — ${phil?.name ?? 'Anónimo'}`
+  const attribution = () => `"${quote.text}" — ${phil?.name ?? t('card.anon')}`
 
   const copyToClipboard = async () => {
     try {
@@ -125,7 +125,7 @@ export default function QuoteCard({
     if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
       try {
         await navigator.share({
-          title: 'Filosofuss',
+          title: t('card.shareTitle'),
           text,
           url: typeof window !== 'undefined' ? window.location.href : '',
         })
@@ -188,7 +188,7 @@ export default function QuoteCard({
           style={depthShallow}
           className={cn('mt-5 flex flex-col gap-1', isFeatured && 'items-center text-center')}
         >
-          <span className="font-display text-accent">{phil?.name ?? 'Anónimo'}</span>
+          <span className="font-display text-accent">{phil?.name ?? t('card.anon')}</span>
           {phil && (
             <span className="text-xs text-muted">
               {phil.era} · {phil.school} · {formatYear(phil.birthYear)}–{formatYear(phil.deathYear)}
@@ -220,7 +220,7 @@ export default function QuoteCard({
           >
             <ActionButton
               onClick={() => toggleFavorite(quote.id)}
-              label={fav ? 'Quitar de favoritos' : 'Añadir a favoritos'}
+              label={fav ? t('card.favRemove') : t('card.favAdd')}
               active={fav}
             >
               <motion.span
@@ -238,7 +238,7 @@ export default function QuoteCard({
               </motion.span>
             </ActionButton>
 
-            <ActionButton onClick={handleCopy} label={copied ? 'Copiado' : 'Copiar cita'}>
+            <ActionButton onClick={handleCopy} label={copied ? t('card.copied') : t('card.copy')}>
               <AnimatePresence mode="wait" initial={false}>
                 {copied ? (
                   <motion.span key="check" {...ICON_SWAP} transition={{ duration: 0.18 }}>
@@ -252,7 +252,7 @@ export default function QuoteCard({
               </AnimatePresence>
             </ActionButton>
 
-            <ActionButton onClick={handleShare} label="Compartir cita">
+            <ActionButton onClick={handleShare} label={t('card.share')}>
               <AnimatePresence mode="wait" initial={false}>
                 {shared ? (
                   <motion.span key="check" {...ICON_SWAP} transition={{ duration: 0.18 }}>
@@ -268,7 +268,7 @@ export default function QuoteCard({
 
             <ActionButton
               onClick={() => toggle(quote.id)}
-              label={narratingThis ? 'Detener narración' : 'Escuchar cita'}
+              label={narratingThis ? t('card.stop') : t('card.listen')}
               active={narratingThis}
             >
               <AnimatePresence mode="wait" initial={false}>

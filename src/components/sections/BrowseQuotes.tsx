@@ -7,6 +7,7 @@ import { shuffle } from '@/lib/utils'
 import SearchBar from '@/components/controls/SearchBar'
 import FilterPanel from '@/components/controls/FilterPanel'
 import QuoteCard from '@/components/quotes/QuoteCard'
+import { useApp } from '@/context/AppContext'
 
 const reduceMotion =
   typeof window !== 'undefined' &&
@@ -14,6 +15,7 @@ const reduceMotion =
   window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 export default function BrowseQuotes() {
+  const { t } = useApp()
   const [query, setQuery] = useState('')
   const [debounced, setDebounced] = useState('')
   const [selectedEra, setSelectedEra] = useState<string | null>(null)
@@ -85,14 +87,14 @@ export default function BrowseQuotes() {
         className="mx-auto max-w-2xl text-center"
       >
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-          Catálogo
+          {t('browse.label')}
         </p>
         <h2 className="mt-3 font-display text-4xl text-content sm:text-5xl">
-          Explora el <span className="text-gradient-animated">universo filosófico</span>
+          {t('browse.titleA')}
+          <span className="text-gradient-animated">{t('browse.titleB')}</span>
         </h2>
         <p className="mt-4 text-muted">
-          Filtra por era, escuela o tema, o busca entre todas las citas del
-          corpus.
+          {t('browse.subtitle')}
         </p>
       </motion.header>
 
@@ -115,9 +117,9 @@ export default function BrowseQuotes() {
 
       <div className="mx-auto mt-8 flex max-w-6xl flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted">
-          Mostrando{' '}
+          {t('browse.showing')}
           <span className="font-semibold text-content">{results.length}</span>{' '}
-          {results.length === 1 ? 'cita' : 'citas'}
+          {results.length === 1 ? t('browse.quote') : t('browse.quotes')}
         </p>
 
         {chips.length > 0 && (
@@ -131,7 +133,7 @@ export default function BrowseQuotes() {
                 <button
                   type="button"
                   onClick={c.clear}
-                  aria-label={`Quitar ${c.label}`}
+                  aria-label={t('browse.removeFilter', { label: c.label })}
                   className="text-muted transition-colors hover:text-content"
                 >
                   <X className="h-3 w-3" />
@@ -146,15 +148,15 @@ export default function BrowseQuotes() {
         <div className="mx-auto mt-12 flex max-w-md flex-col items-center gap-4 rounded-3xl border border-line-soft bg-glass px-6 py-12 text-center">
           <Search className="h-10 w-10 text-muted" />
           <h3 className="font-display text-2xl text-content">
-            No se encontraron citas
+            {t('browse.empty')}
           </h3>
           <p className="text-muted">
-            Prueba con otro término o limpia los filtros activos.
+            {t('browse.emptyHint')}
           </p>
           {hasAny && (
             <button type="button" onClick={clearAll} className="btn-ghost">
               <X className="h-4 w-4" />
-              Limpiar búsqueda
+              {t('browse.clear')}
             </button>
           )}
         </div>

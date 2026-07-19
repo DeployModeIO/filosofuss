@@ -3,6 +3,7 @@ import { SlidersHorizontal, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { allEras, allSchools, allTags } from '@/data/quotes'
+import { useApp } from '@/context/AppContext'
 
 const reduceMotion =
   typeof window !== 'undefined' &&
@@ -85,6 +86,7 @@ export default function FilterPanel({
   onTag,
   onClear,
 }: FilterPanelProps) {
+  const { t } = useApp()
   const [open, setOpen] = useState(false)
   const activeCount = [selectedEra, selectedSchool, selectedTag].filter(
     Boolean,
@@ -94,19 +96,19 @@ export default function FilterPanel({
   const groups = (
     <>
       <FilterGroup
-        title="Era"
+        title={t('filter.era')}
         options={allEras}
         selected={selectedEra}
         onSelect={onEra}
       />
       <FilterGroup
-        title="Escuela"
+        title={t('filter.school')}
         options={allSchools}
         selected={selectedSchool}
         onSelect={onSchool}
       />
       <FilterGroup
-        title="Tema"
+        title={t('filter.tema')}
         options={allTags}
         selected={selectedTag}
         onSelect={onTag}
@@ -118,7 +120,7 @@ export default function FilterPanel({
           className="btn-ghost self-start px-4 py-2 text-sm"
         >
           <X className="h-4 w-4" />
-          Limpiar filtros
+          {t('filter.clear')}
         </button>
       )}
     </>
@@ -133,7 +135,7 @@ export default function FilterPanel({
         className="btn-ghost self-start px-4 py-2 text-sm sm:hidden"
       >
         <SlidersHorizontal className="h-4 w-4" />
-        Filtros
+        {t('filter.label')}
         {hasFilters && (
           <span className="ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent-2 px-1.5 text-xs text-[#0a0a12]">
             {activeCount}

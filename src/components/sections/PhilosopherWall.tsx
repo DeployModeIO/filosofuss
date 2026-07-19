@@ -5,6 +5,7 @@ import { philosophers } from '@/data/philosophers'
 import { getQuotesByPhilosopher } from '@/data/quotes'
 import type { Philosopher } from '@/types'
 import { cn, formatYear, hashCode } from '@/lib/utils'
+import { useApp } from '@/context/AppContext'
 import QuoteCard from '@/components/quotes/QuoteCard'
 
 const reduceMotion =
@@ -38,6 +39,7 @@ function gradientFor(id: string): string {
 }
 
 export default function PhilosopherWall() {
+  const { t } = useApp()
   const [selected, setSelected] = useState<Philosopher | null>(null)
 
   useEffect(() => {
@@ -65,14 +67,14 @@ export default function PhilosopherWall() {
         className="mx-auto max-w-2xl text-center"
       >
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-          Panteón
+          {t('wall.label')}
         </p>
         <h2 className="mt-3 font-display text-4xl text-content sm:text-5xl">
-          Los <span className="text-gradient-animated">filósofos</span>
+          {t('wall.titleA')}
+          <span className="text-gradient-animated">{t('wall.titleB')}</span>
         </h2>
         <p className="mt-4 text-muted">
-          {philosophers.length} pensadores que modelaron la historia de las
-          ideas. Pulsa cualquiera para conocer su obra.
+          {t('wall.subtitle', { n: philosophers.length })}
         </p>
       </motion.header>
 
@@ -105,8 +107,8 @@ export default function PhilosopherWall() {
                   {p.era} · {p.school}
                 </span>
               </span>
-              <span className="text-xs font-medium text-accent">
-                {count} {count === 1 ? 'cita' : 'citas'}
+               <span className="text-xs font-medium text-accent">
+                {count} {count === 1 ? t('wall.quote') : t('wall.quotes')}
               </span>
             </motion.button>
           )
@@ -130,7 +132,7 @@ export default function PhilosopherWall() {
             <motion.div
               role="dialog"
               aria-modal="true"
-              aria-label={`Ficha de ${selected.fullName}`}
+              aria-label={t('wall.sheetOf', { name: selected.fullName })}
               className="glass-strong relative z-10 max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-3xl p-6 shadow-card sm:p-8"
               initial={
                 reduceMotion ? false : { opacity: 0, y: 24, scale: 0.97 }
@@ -144,7 +146,7 @@ export default function PhilosopherWall() {
               <button
                 type="button"
                 onClick={() => setSelected(null)}
-                aria-label="Cerrar"
+                aria-label={t('wall.close')}
                 className="glass absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-muted transition-colors hover:text-content"
               >
                 <X className="h-4 w-4" />
@@ -185,7 +187,7 @@ export default function PhilosopherWall() {
               <div className="mt-8 flex flex-col gap-3">
                 <h4 className="inline-flex items-center gap-2 font-display text-lg text-content">
                   <BookOpen className="h-5 w-5 text-accent" />
-                  Citas ({selectedQuotes.length})
+                  {t('wall.quotesCount', { n: selectedQuotes.length })}
                 </h4>
                 <div className="flex flex-col gap-3">
                   {selectedQuotes.map((q, i) => (

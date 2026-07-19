@@ -12,17 +12,17 @@ const reduceMotion =
   window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 export default function Favorites() {
-  const { favorites, favoritesCount, clearFavorites } = useApp()
+  const { favorites, favoritesCount, clearFavorites, t } = useApp()
   const favQuotes: Quote[] = favorites
     .map((id) => getQuoteById(id))
     .filter((q): q is Quote => q !== undefined)
 
   const handleClear = () => {
-    if (
-      window.confirm(
-        '¿Vaciar todos tus favoritos? Esta acción no se puede deshacer.',
-      )
-    ) {
+      if (
+        window.confirm(
+          t('fav.confirm'),
+        )
+      ) {
       clearFavorites()
     }
   }
@@ -36,15 +36,15 @@ export default function Favorites() {
         className="mx-auto max-w-2xl text-center"
       >
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-          Tu colección
+          {t('fav.label')}
         </p>
         <h2 className="mt-3 font-display text-4xl text-content sm:text-5xl">
-          <span className="text-gradient-animated">Favoritos</span>
+          <span className="text-gradient-animated">{t('fav.title')}</span>
         </h2>
         <p className="mt-4 text-muted">
           {favoritesCount === 0
-            ? 'Aún no has guardado ninguna cita.'
-            : `${favoritesCount} ${favoritesCount === 1 ? 'cita guardada' : 'citas guardadas'}.`}
+            ? t('fav.empty')
+            : `${favoritesCount} ${favoritesCount === 1 ? t('fav.savedOne') : t('fav.savedMany')}`}
         </p>
       </motion.header>
 
@@ -59,14 +59,13 @@ export default function Favorites() {
             <Heart className="h-9 w-9 text-accent-3" />
           </span>
           <h3 className="font-display text-2xl text-content">
-            Aún no has guardado citas
+            {t('fav.emptyTitle')}
           </h3>
           <p className="text-muted">
-            Explora el corpus y marca con el corazón las citas que más te
-            conmuevan.
+            {t('fav.emptyHint')}
           </p>
           <Link to="/explorar" className="btn-primary">
-            Explorar citas
+            {t('fav.explore')}
           </Link>
         </motion.div>
       ) : (
@@ -78,7 +77,7 @@ export default function Favorites() {
               className="btn-ghost text-sm"
             >
               <Trash2 className="h-4 w-4" />
-              Vaciar favoritos
+              {t('fav.clear')}
             </button>
           </div>
           <motion.div

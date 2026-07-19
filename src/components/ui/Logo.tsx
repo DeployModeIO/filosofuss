@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useApp } from '@/context/AppContext'
 
 export interface LogoProps {
   size?: 'sm' | 'md' | 'lg'
@@ -20,10 +21,11 @@ const SIZE_ICON: Record<NonNullable<LogoProps['size']>, number> = {
 }
 
 export default function Logo({ size = 'md', className }: LogoProps) {
+  const { t } = useApp()
   return (
     <Link
       to="/"
-      aria-label="Filosofuss — ir al inicio"
+      aria-label={t('nav.home')}
       className={cn(
         'group inline-flex select-none items-center gap-2 font-logo tracking-[0.18em]',
         className,

@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { useLocalStorage } from '@/lib/storage'
+import { translate, type Locale } from '@/i18n/strings'
 
 export type Theme = 'dark' | 'light'
 
@@ -15,6 +16,11 @@ export interface AppContextValue {
   addFavorite: (id: string) => void
   removeFavorite: (id: string) => void
   clearFavorites: () => void
+  locale: Locale
+  setLocale: (locale: Locale) => void
+  toggleLocale: () => void
+  /** Traduce una clave de UI al idioma actual (con placeholders opcionales). */
+  t: (key: string, vars?: Record<string, string | number>) => string
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined)
@@ -38,6 +44,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     'filosofuss:favorites',
     [],
   )
+  const [locale, setLocale] = useLocalStorage<Locale>(
+    'filosofuss:locale',
+    'es',
+  )
 
   // Apply theme class to <html> whenever it changes (and on first mount).
   useEffect(() => {
@@ -45,6 +55,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (theme === 'light') root.classList.add('light')
     else root.classList.remove('light')
   }, [theme])
+
+  // Keep <html lang> in sync with the active UI locale.
+  useEffect(() => {
+    document.documentElement.lang = locale
+  }, [locale])
 
   const toggleTheme = useCallback(() => {
     setThemeState(theme === 'light' ? 'dark' : 'light')
@@ -55,6 +70,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setThemeState(next)
     },
     [setThemeState],
+  )
+
+  const toggleLocale = useCallback(() => {
+    setLocale(locale === 'es' ? 'en' : 'es')
+  }, [locale, setLocale])
+
+  const t = useCallback(
+    (key: string, vars?: Record<string, string | number>) =>
+      translate(locale, key, vars),
+    [locale],
   )
 
   const isFavorite = useCallback((id: string) => favorites.includes(id), [favorites])
@@ -100,6 +125,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addFavorite,
       removeFavorite,
       clearFavorites,
+      locale,
+      setLocale,
+      toggleLocale,
+      t,
     }),
     [
       theme,
@@ -111,6 +140,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addFavorite,
       removeFavorite,
       clearFavorites,
+      locale,
+      setLocale,
+      toggleLocale,
+      t,
     ],
   )
 

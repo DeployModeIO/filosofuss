@@ -6,20 +6,22 @@ import { cn } from '@/lib/utils'
 import { useApp } from '@/context/AppContext'
 import Logo from './Logo'
 import ThemeToggle from './ThemeToggle'
+import LanguageToggle from './LanguageToggle'
 
 interface NavItem {
   to: string
-  label: string
+  key: string
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { to: '/', label: 'Inicio' },
-  { to: '/explorar', label: 'Explorar' },
-  { to: '/filosofos', label: 'Filósofos' },
-  { to: '/favoritos', label: 'Favoritos' },
+  { to: '/', key: 'nav.inicio' },
+  { to: '/explorar', key: 'nav.explorar' },
+  { to: '/filosofos', key: 'nav.filosofos' },
+  { to: '/favoritos', key: 'nav.favoritos' },
 ]
 
 function DesktopLink({ item, favoritesCount }: { item: NavItem; favoritesCount: number }) {
+  const { t } = useApp()
   const isFav = item.to === '/favoritos'
   return (
     <NavLink
@@ -34,7 +36,7 @@ function DesktopLink({ item, favoritesCount }: { item: NavItem; favoritesCount: 
     >
       {({ isActive }) => (
         <>
-          <span>{item.label}</span>
+          <span>{t(item.key)}</span>
           {isFav && (
             <Heart
               size={14}
@@ -44,7 +46,7 @@ function DesktopLink({ item, favoritesCount }: { item: NavItem; favoritesCount: 
           )}
           {isFav && favoritesCount > 0 && (
             <span
-              aria-label={`${favoritesCount} favoritos`}
+              aria-label={t('nav.favoritesCount', { n: favoritesCount })}
               className="grid h-4 min-w-[1rem] place-items-center rounded-full bg-accent px-1 text-[10px] font-bold leading-none text-bg"
             >
               {favoritesCount}
@@ -71,6 +73,7 @@ function MobileLink({
   favoritesCount: number
   onNavigate: () => void
 }) {
+  const { t } = useApp()
   const isFav = item.to === '/favoritos'
   return (
     <NavLink
@@ -86,7 +89,7 @@ function MobileLink({
     >
       {({ isActive }) => (
         <>
-          <span>{item.label}</span>
+          <span>{t(item.key)}</span>
           {isFav && (
             <Heart
               size={16}
@@ -106,7 +109,7 @@ function MobileLink({
 }
 
 export default function Navbar() {
-  const { favoritesCount } = useApp()
+  const { favoritesCount, t } = useApp()
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -134,11 +137,12 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-2">
+          <LanguageToggle />
           <ThemeToggle />
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
+            aria-label={open ? t('nav.closeMenu') : t('nav.openMenu')}
             aria-expanded={open}
             className="glass-strong grid h-10 w-10 place-items-center rounded-full text-content transition-colors hover:text-accent md:hidden"
           >

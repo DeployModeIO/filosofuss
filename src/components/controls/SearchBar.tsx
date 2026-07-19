@@ -1,5 +1,6 @@
 import { Search, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useApp } from '@/context/AppContext'
 
 export interface SearchBarProps {
   query: string
@@ -14,6 +15,7 @@ export default function SearchBar({
   placeholder = 'Buscar citas, filósofos, temas…',
   autoFocus = false,
 }: SearchBarProps) {
+  const { t } = useApp()
   return (
     <div
       className={cn(
@@ -27,15 +29,15 @@ export default function SearchBar({
         value={query}
         autoFocus={autoFocus}
         onChange={(e) => onQuery(e.target.value)}
-        placeholder={placeholder}
-        aria-label="Buscar citas"
+        placeholder={t('search.placeholder')}
+        aria-label={t('search.aria')}
         className="w-full bg-transparent text-content placeholder:text-muted focus:outline-none"
       />
       {query.length > 0 && (
         <button
           type="button"
           onClick={() => onQuery('')}
-          aria-label="Limpiar búsqueda"
+          aria-label={t('search.clear')}
           className="shrink-0 rounded-full p-1 text-muted transition-colors hover:text-content"
         >
           <X className="h-4 w-4" />

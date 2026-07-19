@@ -3,15 +3,15 @@ import { Moon, Sun } from 'lucide-react'
 import { useApp } from '@/context/AppContext'
 
 export default function ThemeToggle() {
-  const { theme, toggleTheme } = useApp()
+  const { theme, toggleTheme, t } = useApp()
   const isLight = theme === 'light'
 
   return (
     <button
       type="button"
       onClick={toggleTheme}
-      aria-label={isLight ? 'Activar modo oscuro' : 'Activar modo claro'}
-      title={isLight ? 'Activar modo oscuro' : 'Activar modo claro'}
+      aria-label={isLight ? t('theme.toDark') : t('theme.toLight')}
+      title={isLight ? t('theme.toDark') : t('theme.toLight')}
       className="glass-strong grid h-10 w-10 place-items-center rounded-full text-content transition-colors duration-300 hover:text-accent focus-visible:text-accent"
     >
       <AnimatePresence mode="wait" initial={false}>
