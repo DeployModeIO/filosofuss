@@ -78,3 +78,13 @@ export interface Quote {
   /** obra u origen opcional, p. ej. "Así habló Zaratustra" */
   source?: string;
 }
+
+/** Traducción de una cita al inglés (generada por scripts/translate-quotes-glm.mjs). */
+export interface QuoteEn {
+  /** id de la cita original (p. ej. "q-nietzsche-1") */
+  id: string;
+  /** texto de la cita en inglés */
+  text: string;
+  /** obra u origen en inglés, si aplica */
+  source?: string;
+}

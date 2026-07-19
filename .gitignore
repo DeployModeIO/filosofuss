@@ -15,6 +15,12 @@ dist-ssr
 
 # Local env files
 *.local
+.env
+.env.*
+!.env.example
+
+# Translation script artifacts (reanudable)
+scripts/.translate-progress.json
 
 # Editor directories and files
 .vscode/
