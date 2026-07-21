@@ -52,8 +52,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Apply theme class to <html> whenever it changes (and on first mount).
   useEffect(() => {
     const root = document.documentElement
-    if (theme === 'light') root.classList.add('light')
-    else root.classList.remove('light')
+    if (theme === 'light') {
+      root.classList.add('light')
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#f9f7f3')
+    } else {
+      root.classList.remove('light')
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#07070f')
+    }
   }, [theme])
 
   // Keep <html lang> in sync with the active UI locale.

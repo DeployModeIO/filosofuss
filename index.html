@@ -39,7 +39,7 @@
       #root {
         height: 100%;
         margin: 0;
-        background-color: #0a0a12;
+        background-color: var(--bg);
       }
       /* Minimal loader shown before React mounts. */
       #initial-loader {
@@ -48,7 +48,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: #0a0a12;
+        background-color: var(--bg);
       }
       .spinner {
         width: 44px;
@@ -64,6 +64,16 @@
         }
       }
     </style>
+
+    <script>
+      (function(){
+        try {
+          if (localStorage.getItem('filosofuss:theme') === 'light') {
+            document.documentElement.classList.add('light');
+          }
+        } catch(e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root">
