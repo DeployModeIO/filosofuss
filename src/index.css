@@ -32,19 +32,19 @@
 
 html.light {
   /* Light theme */
-  --bg: #f6f3ec;
-  --bg-2: #efeae0;
-  --glass: rgba(255, 255, 255, 0.7);
-  --glass-strong: rgba(255, 255, 255, 0.9);
-  --border: rgba(120, 90, 30, 0.18);
-  --border-soft: rgba(0, 0, 0, 0.08);
-  --text: #1b1a26;
-  --muted: #5c5868;
-  --accent: #a8843c;
+  --bg: #f9f7f3;
+  --bg-2: #f0ede8;
+  --glass: rgba(255, 255, 255, 0.85);
+  --glass-strong: rgba(255, 255, 255, 0.98);
+  --border: rgba(112, 88, 40, 0.22);
+  --border-soft: rgba(0, 0, 0, 0.12);
+  --text: #181620;
+  --muted: #6a6575;
+  --accent: #9c7633;
   --accent-2: #6b46d6;
   --accent-3: #c64b86;
-  --glow: rgba(107, 70, 214, 0.28);
-  --shadow: 0 20px 50px -22px rgba(60, 40, 10, 0.35);
+  --glow: rgba(107, 70, 214, 0.25);
+  --shadow: 0 18px 50px -20px rgba(50, 40, 25, 0.2);
 }
 
 /* ---------- Resets ---------- */
