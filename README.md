@@ -39,7 +39,7 @@ Toda la interfaz y el contenido están en **español (castellano)**. El proyecto
 | 🌗 | **Modo claro/oscuro** | Transición suave; respeta `prefers-color-scheme` del sistema. |
 | ♿ | **Accesibilidad** | Respeta `prefers-reduced-motion`, foco visible, navegación por teclado (**Esc** cierra el modal) y `aria-labels`. |
 | 📱 | **Totalmente responsive** | Diseño adaptativo de móvil a escritorio. |
-| 📋 | **Acciones por cita** | **Copiar** al portapapeles y **compartir** (Web Share API con *fallback*). |
+| 📋 | **Acciones por cita** | **Copiar** al portapapeles, **compartir** (Web Share API con *fallback*) y **publicar en LinkedIn**. |
 
 ---
 

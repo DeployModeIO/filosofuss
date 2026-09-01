@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { MouseEvent, ReactNode } from 'react'
 import { AnimatePresence, motion, useMotionTemplate, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import type { LucideIcon } from 'lucide-react'
-import { Calendar, Check, Clock, Copy, Heart, Landmark, Maximize2, Quote as QuoteIcon, Share2, Volume2, Square } from 'lucide-react'
+import { Calendar, Check, Clock, Copy, Heart, Landmark, Linkedin, Maximize2, Quote as QuoteIcon, Share2, Volume2, Square } from 'lucide-react'
 import type { Philosopher, Quote } from '@/types'
 import { getPhilosopherById, getQuoteSource, getQuoteText } from '@/data/quotes'
 import { cn, formatYear } from '@/lib/utils'
@@ -165,6 +165,12 @@ export default function QuoteCard({
     }
   }
 
+  const handleLinkedInShare = () => {
+    const url = typeof window !== 'undefined' ? window.location.href : ''
+    const linkedIn = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`
+    window.open(linkedIn, '_blank', 'noopener,noreferrer')
+  }
+
   const isFeatured = variant === 'featured'
   const isCompact = variant === 'compact'
   const depth = prefersReducedMotion ? undefined : { transform: 'translateZ(40px)' }
@@ -314,6 +320,10 @@ export default function QuoteCard({
                   </motion.span>
                 )}
               </AnimatePresence>
+            </ActionButton>
+
+            <ActionButton onClick={handleLinkedInShare} label={t('card.shareLinkedIn')}>
+              <Linkedin size={18} className="text-muted" aria-hidden="true" />
             </ActionButton>
 
             <ActionButton

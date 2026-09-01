@@ -76,6 +76,7 @@ const es: Dict = {
   'card.stop': 'Detener narración',
   'card.anon': 'Anónimo',
   'card.shareTitle': 'Filosofuss',
+  'card.shareLinkedIn': 'Compartir en LinkedIn',
 
   // Explorar
   'browse.label': 'Catálogo',
@@ -210,6 +211,7 @@ const en: Dict = {
   'card.stop': 'Stop narration',
   'card.anon': 'Anonymous',
   'card.shareTitle': 'Filosofuss',
+  'card.shareLinkedIn': 'Share on LinkedIn',
 
   // Explore
   'browse.label': 'Catalog',
