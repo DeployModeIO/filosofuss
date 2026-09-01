@@ -9,6 +9,7 @@ import Footer from '@/components/ui/Footer'
 import AudioPlayer from '@/components/ui/AudioPlayer'
 import ScrollToTop from '@/components/ui/ScrollToTop'
 import ZenMode from '@/components/ui/ZenMode'
+import QuoteDeepLink from '@/components/ui/QuoteDeepLink'
 import Home from '@/pages/Home'
 
 // Rutas secundarias cargadas bajo demanda para reducir el bundle inicial.
@@ -49,6 +50,7 @@ export default function App() {
           <Footer />
           <AudioPlayer />
           <ZenMode />
+          <QuoteDeepLink />
         </NarrationProvider>
       </AudioProvider>
     </AppProvider>

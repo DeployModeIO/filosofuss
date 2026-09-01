@@ -85,3 +85,16 @@ export function formatYear(year: number | null): string {
   if (year < 0) return `${Math.abs(year)} a. C.`;
   return String(year);
 }
+
+/**
+ * Construye la URL compartible de una cita (deep link con ?cita=<id>).
+ * Al abrirla, la app reconoce el parámetro y abre la cita en modo lectura.
+ */
+export function buildQuoteShareUrl(quoteId: string): string {
+  if (typeof window === "undefined") return "";
+  const url = new URL(window.location.href);
+  url.search = "";
+  url.hash = "";
+  url.searchParams.set("cita", quoteId);
+  return url.toString();
+}

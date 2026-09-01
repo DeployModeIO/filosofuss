@@ -5,7 +5,7 @@ import type { LucideIcon } from 'lucide-react'
 import { Calendar, Check, Clock, Copy, Heart, Landmark, Linkedin, Maximize2, Quote as QuoteIcon, Share2, Volume2, Square } from 'lucide-react'
 import type { Philosopher, Quote } from '@/types'
 import { getPhilosopherById, getQuoteSource, getQuoteText } from '@/data/quotes'
-import { cn, formatYear } from '@/lib/utils'
+import { buildQuoteShareUrl, cn, formatYear } from '@/lib/utils'
 import { useApp } from '@/context/AppContext'
 import { useNarration } from '@/context/NarrationContext'
 
@@ -152,7 +152,7 @@ export default function QuoteCard({
         await navigator.share({
           title: t('card.shareTitle'),
           text,
-          url: typeof window !== 'undefined' ? window.location.href : '',
+          url: buildQuoteShareUrl(quote.id),
         })
         return
       } catch {
@@ -166,8 +166,7 @@ export default function QuoteCard({
   }
 
   const handleLinkedInShare = () => {
-    const url = typeof window !== 'undefined' ? window.location.href : ''
-    const linkedIn = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`
+    const linkedIn = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(buildQuoteShareUrl(quote.id))}`
     window.open(linkedIn, '_blank', 'noopener,noreferrer')
   }
 
