@@ -12,7 +12,7 @@ interface Particle {
   color: string
 }
 
-const COLORS = ['rgba(201,169,106,', 'rgba(124,92,255,', 'rgba(230,101,159,']
+const COLORS = ['rgba(201,169,106,', 'rgba(176,113,63,', 'rgba(122,46,77,']
 
 function createParticles(width: number, height: number): Particle[] {
   const count = Math.min(70, Math.max(22, Math.floor(width / 24)))
@@ -79,8 +79,6 @@ export default function ParticleField() {
         ctx.beginPath()
         ctx.arc(x, p.y, p.r, 0, Math.PI * 2)
         ctx.fillStyle = `${p.color}${p.alpha})`
-        ctx.shadowBlur = 8
-        ctx.shadowColor = `${p.color}${p.alpha * 0.6})`
         ctx.fill()
       }
       raf = requestAnimationFrame(draw)
@@ -99,6 +97,17 @@ export default function ParticleField() {
 
     resize()
 
+    let running = !reduceMotion
+    const stop = () => {
+      running = false
+      cancelAnimationFrame(raf)
+    }
+    const start = () => {
+      if (running || reduceMotion) return
+      running = true
+      raf = requestAnimationFrame(draw)
+    }
+
     if (reduceMotion) {
       drawStatic()
     } else {
@@ -109,11 +118,18 @@ export default function ParticleField() {
       resize()
       if (reduceMotion) drawStatic()
     }
+    const onVisibility = () => {
+      if (reduceMotion) return
+      if (document.hidden) stop()
+      else start()
+    }
     window.addEventListener('resize', onResize)
+    document.addEventListener('visibilitychange', onVisibility)
 
     return () => {
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', onResize)
+      document.removeEventListener('visibilitychange', onVisibility)
     }
   }, [])
 

@@ -1,9 +1,10 @@
+import { useState } from 'react'
 import { motion, type Variants } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { ArrowRight, ChevronDown, Quote, Sparkles, Users } from 'lucide-react'
-import { quotes } from '@/data/quotes'
-import { philosophers } from '@/data/philosophers'
+import { getPhilosopherById, getRandomQuote } from '@/data/quotes'
 import { useApp } from '@/context/AppContext'
+import AnimatedQuote from '@/components/quotes/AnimatedQuote'
 
 const reduceMotion =
   typeof window !== 'undefined' &&
@@ -22,6 +23,9 @@ const item: Variants = {
 
 export default function Hero() {
   const { t } = useApp()
+  const [featured] = useState(() => getRandomQuote())
+  const philosopher = getPhilosopherById(featured.philosopherId)
+
   return (
     <section className="relative flex min-h-[92vh] w-full items-center justify-center overflow-hidden px-5 py-24 sm:px-8">
       {/* Elementos decorativos */}
@@ -44,28 +48,46 @@ export default function Hero() {
         animate="show"
         className="relative z-10 mx-auto flex max-w-4xl flex-col items-center text-center"
       >
+        {/* Eyebrow — marca */}
         <motion.p
           variants={item}
-          className="mb-6 inline-flex items-center gap-2 rounded-full border border-line-soft bg-glass px-4 py-1.5 text-xs font-medium uppercase tracking-[0.18em] text-muted sm:text-sm"
+          className="mb-8 inline-flex items-center gap-2 rounded-full border border-line-soft bg-glass px-4 py-1.5 font-logo text-xs uppercase tracking-[0.3em] text-accent sm:text-sm"
         >
-          <Sparkles className="h-4 w-4 text-accent" />
-          {t('hero.meta', { n: quotes.length, m: philosophers.length })}
+          <Sparkles className="h-4 w-4" />
+          Filosofuss
         </motion.p>
 
-        <motion.h1
+        {/* Cita monumental */}
+        <AnimatedQuote
+          text={featured.text}
+          className="font-serif text-3xl italic leading-snug text-content sm:text-5xl lg:text-6xl"
+        />
+
+        {/* Atribución */}
+        <motion.div
           variants={item}
-          className="font-logo text-6xl leading-none tracking-[0.08em] text-gradient-animated glow sm:text-7xl lg:text-8xl"
+          className="mt-8 flex flex-col items-center gap-1"
         >
-          Filosofuss
-        </motion.h1>
+          {philosopher && (
+            <>
+              <span className="font-display text-xl text-accent sm:text-2xl">
+                {philosopher.name}
+              </span>
+              <span className="text-sm text-muted">
+                {philosopher.era} · {philosopher.school}
+              </span>
+            </>
+          )}
+        </motion.div>
 
         <motion.p
           variants={item}
-          className="mt-8 max-w-2xl font-serif text-xl italic text-muted sm:text-2xl"
+          className="mt-6 max-w-xl font-serif text-base italic text-muted sm:text-lg"
         >
           {t('hero.subtitle')}
         </motion.p>
 
+        {/* CTAs */}
         <motion.div
           variants={item}
           className="mt-10 flex flex-col items-center gap-4 sm:flex-row"
@@ -93,3 +115,4 @@ export default function Hero() {
     </section>
   )
 }
+

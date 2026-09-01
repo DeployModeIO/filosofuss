@@ -11,7 +11,7 @@
 
     <!-- PWA: Web App Manifest -->
     <link rel="manifest" href="/manifest.webmanifest" />
-    <meta name="theme-color" content="#07070f" />
+    <meta name="theme-color" content="#0a0a0f" />
 
     <!-- PWA: iOS / Apple (crítico para instalar en iPhone) -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -68,8 +68,14 @@
     <script>
       (function(){
         try {
-          if (localStorage.getItem('filosofuss:theme') === 'light') {
-            document.documentElement.classList.add('light');
+          var raw = localStorage.getItem('filosofuss:theme');
+          if (raw) {
+            var t = JSON.parse(raw);
+            if (t === 'light') {
+              document.documentElement.classList.add('light');
+            } else if (t === 'paper') {
+              document.documentElement.classList.add('paper');
+            }
           }
         } catch(e) {}
       })();

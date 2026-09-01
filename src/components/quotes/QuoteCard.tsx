@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import type { MouseEvent, ReactNode } from 'react'
-import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
-import { Check, Copy, Heart, Quote as QuoteIcon, Share2, Volume2, Square } from 'lucide-react'
+import { AnimatePresence, motion, useMotionTemplate, useMotionValue, useSpring, useTransform } from 'framer-motion'
+import type { LucideIcon } from 'lucide-react'
+import { Calendar, Check, Clock, Copy, Heart, Landmark, Maximize2, Quote as QuoteIcon, Share2, Volume2, Square } from 'lucide-react'
 import type { Philosopher, Quote } from '@/types'
 import { getPhilosopherById, getQuoteSource, getQuoteText } from '@/data/quotes'
 import { cn, formatYear } from '@/lib/utils'
@@ -31,6 +32,23 @@ const ICON_SWAP = {
   initial: { opacity: 0, scale: 0.5 },
   animate: { opacity: 1, scale: 1 },
   exit: { opacity: 0, scale: 0.5 },
+}
+
+function initials(name: string): string {
+  const cleaned = name.replace(/\(.*?\)/g, '').trim()
+  const parts = cleaned.split(/[\s-]+/).filter(Boolean)
+  if (parts.length === 0) return '?'
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase()
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
+}
+
+function MetaChip({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-line-soft bg-glass px-2.5 py-1 text-xs text-muted">
+      <Icon size={12} className="text-accent" aria-hidden="true" />
+      {label}
+    </span>
+  )
 }
 
 function ActionButton({
@@ -70,7 +88,7 @@ export default function QuoteCard({
   showActions = true,
 }: QuoteCardProps) {
   const phil = philosopher ?? getPhilosopherById(quote.philosopherId)
-  const { isFavorite, toggleFavorite, t, locale } = useApp()
+  const { isFavorite, toggleFavorite, t, locale, openZen } = useApp()
   const { activeQuoteId, isNarrating, toggle } = useNarration()
   const fav = isFavorite(quote.id)
   const narratingThis = isNarrating && activeQuoteId === quote.id
@@ -90,11 +108,18 @@ export default function QuoteCard({
     damping: 20,
   })
 
+  // Spotlight that follows the cursor (subtle gold glow).
+  const sx = useMotionValue(50)
+  const sy = useMotionValue(50)
+  const spotlight = useMotionTemplate`radial-gradient(360px circle at ${sx}% ${sy}%, rgba(201, 169, 106, 0.12), transparent 65%)`
+
   const handlePointerMove = (e: MouseEvent<HTMLDivElement>) => {
     if (prefersReducedMotion) return
     const rect = e.currentTarget.getBoundingClientRect()
     px.set((e.clientX - rect.left) / rect.width - 0.5)
     py.set((e.clientY - rect.top) / rect.height - 0.5)
+    sx.set(((e.clientX - rect.left) / rect.width) * 100)
+    sy.set(((e.clientY - rect.top) / rect.height) * 100)
   }
 
   const resetTilt = () => {
@@ -165,6 +190,14 @@ export default function QuoteCard({
           isFeatured && 'p-8 sm:p-12',
         )}
       >
+        <motion.div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{ background: spotlight }}
+          initial={{ opacity: 0 }}
+          whileHover={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        />
         <QuoteIcon
           aria-hidden="true"
           className={cn(
@@ -186,14 +219,31 @@ export default function QuoteCard({
 
         <div
           style={depthShallow}
-          className={cn('mt-5 flex flex-col gap-1', isFeatured && 'items-center text-center')}
+          className={cn('mt-5 flex flex-col gap-2.5', isFeatured && 'items-center text-center')}
         >
-          <span className="font-display text-accent">{phil?.name ?? t('card.anon')}</span>
-          {phil && (
-            <span className="text-xs text-muted">
-              {phil.era} · {phil.school} · {formatYear(phil.birthYear)}–{formatYear(phil.deathYear)}
+          {/* Author chip */}
+          <div className="flex items-center gap-2.5">
+            <span
+              aria-hidden="true"
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-accent to-accent-2 text-xs font-bold text-[#0a0a12]"
+            >
+              {phil ? initials(phil.name) : '?'}
             </span>
-          )}
+            <span className="font-display text-base text-accent">{phil?.name ?? t('card.anon')}</span>
+          </div>
+
+          {/* School / era / years chips */}
+          <div className={cn('flex flex-wrap gap-2', isFeatured && 'justify-center')}>
+            {phil?.school && <MetaChip icon={Landmark} label={phil.school} />}
+            {phil?.era && <MetaChip icon={Calendar} label={phil.era} />}
+            {phil && (
+              <MetaChip
+                icon={Clock}
+                label={`${formatYear(phil.birthYear)}–${formatYear(phil.deathYear)}`}
+              />
+            )}
+          </div>
+
           {quote.source && <span className="text-xs italic text-muted">— {getQuoteSource(quote, locale)}</span>}
         </div>
 
@@ -205,7 +255,7 @@ export default function QuoteCard({
             {quote.tags.map((t) => (
               <span
                 key={t}
-                className="rounded-full border border-line-soft px-2.5 py-0.5 text-xs text-muted"
+                className="rounded-full border border-line-soft bg-glass px-2.5 py-0.5 text-xs text-muted transition-colors hover:border-line hover:text-accent"
               >
                 #{t}
               </span>
@@ -297,6 +347,10 @@ export default function QuoteCard({
                   </motion.span>
                 )}
               </AnimatePresence>
+            </ActionButton>
+
+            <ActionButton onClick={() => openZen(quote.id)} label={t('zen.enter')}>
+              <Maximize2 size={18} className="text-muted" aria-hidden="true" />
             </ActionButton>
           </div>
         )}

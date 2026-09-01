@@ -1,9 +1,9 @@
-import { createContext, useCallback, useContext, useEffect, useMemo } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useLocalStorage } from '@/lib/storage'
 import { translate, type Locale } from '@/i18n/strings'
 
-export type Theme = 'dark' | 'light'
+export type Theme = 'dark' | 'light' | 'paper'
 
 export interface AppContextValue {
   theme: Theme
@@ -21,6 +21,10 @@ export interface AppContextValue {
   toggleLocale: () => void
   /** Traduce una clave de UI al idioma actual (con placeholders opcionales). */
   t: (key: string, vars?: Record<string, string | number>) => string
+  /** Modo zen / lectura enfocada: id de la cita abierta, o null si está cerrado. */
+  zenQuoteId: string | null
+  openZen: (id: string) => void
+  closeZen: () => void
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined)
@@ -48,17 +52,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     'filosofuss:locale',
     'es',
   )
+  const [zenQuoteId, setZenQuoteId] = useState<string | null>(null)
 
   // Apply theme class to <html> whenever it changes (and on first mount).
   useEffect(() => {
     const root = document.documentElement
+    root.classList.remove('light', 'paper')
     if (theme === 'light') {
       root.classList.add('light')
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#f9f7f3')
-    } else {
-      root.classList.remove('light')
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#07070f')
+    } else if (theme === 'paper') {
+      root.classList.add('paper')
     }
+    const meta = document.querySelector('meta[name="theme-color"]')
+    meta?.setAttribute(
+      'content',
+      theme === 'light' ? '#f9f7f3' : theme === 'paper' ? '#f2ead9' : '#0a0a0f',
+    )
   }, [theme])
 
   // Keep <html lang> in sync with the active UI locale.
@@ -67,7 +76,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [locale])
 
   const toggleTheme = useCallback(() => {
-    setThemeState(theme === 'light' ? 'dark' : 'light')
+    setThemeState(theme === 'dark' ? 'light' : theme === 'light' ? 'paper' : 'dark')
   }, [theme, setThemeState])
 
   const setTheme = useCallback(
@@ -118,6 +127,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setFavorites([])
   }, [setFavorites])
 
+  const openZen = useCallback((id: string) => setZenQuoteId(id), [])
+  const closeZen = useCallback(() => setZenQuoteId(null), [])
+
   const value = useMemo<AppContextValue>(
     () => ({
       theme,
@@ -134,6 +146,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setLocale,
       toggleLocale,
       t,
+      zenQuoteId,
+      openZen,
+      closeZen,
     }),
     [
       theme,
@@ -149,6 +164,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setLocale,
       toggleLocale,
       t,
+      zenQuoteId,
+      openZen,
+      closeZen,
     ],
   )
 

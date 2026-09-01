@@ -18,7 +18,7 @@ interface AuroraBlob {
 
 const BLOBS: AuroraBlob[] = [
   {
-    bg: 'radial-gradient(circle at center, rgba(124,92,255,0.55), rgba(124,92,255,0) 62%)',
+    bg: 'radial-gradient(circle at center, rgba(176,113,63,0.50), rgba(176,113,63,0) 62%)',
     size: 'min(620px, 62vw)',
     left: '-6%',
     top: '-10%',
@@ -38,7 +38,7 @@ const BLOBS: AuroraBlob[] = [
     scale: [1, 0.9, 1.1, 1],
   },
   {
-    bg: 'radial-gradient(circle at center, rgba(230,101,159,0.45), rgba(230,101,159,0) 60%)',
+    bg: 'radial-gradient(circle at center, rgba(122,46,77,0.45), rgba(122,46,77,0) 60%)',
     size: 'min(600px, 60vw)',
     left: '28%',
     top: '56%',
@@ -48,7 +48,7 @@ const BLOBS: AuroraBlob[] = [
     scale: [1, 1.2, 0.9, 1],
   },
   {
-    bg: 'radial-gradient(circle at center, rgba(124,92,255,0.40), rgba(124,92,255,0) 62%)',
+    bg: 'radial-gradient(circle at center, rgba(176,113,63,0.35), rgba(176,113,63,0) 62%)',
     size: 'min(500px, 50vw)',
     left: '6%',
     top: '58%',
@@ -73,8 +73,8 @@ export default function AuroraBackground() {
               left: blob.left,
               top: blob.top,
               background: blob.bg,
-              filter: 'blur(70px)',
-              opacity: 0.5,
+              filter: 'blur(50px)',
+              opacity: 0.42,
             }}
           />
         ) : (
@@ -87,8 +87,8 @@ export default function AuroraBackground() {
               left: blob.left,
               top: blob.top,
               background: blob.bg,
-              filter: 'blur(70px)',
-              opacity: 0.5,
+              filter: 'blur(50px)',
+              opacity: 0.42,
             }}
             animate={{ x: blob.x, y: blob.y, scale: blob.scale }}
             transition={{ duration: blob.duration, repeat: Infinity, ease: 'easeInOut' }}

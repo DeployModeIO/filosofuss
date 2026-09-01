@@ -1,37 +1,23 @@
 import { Link } from 'react-router-dom'
-import { motion, type Variants } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Quote as QuoteIcon, Volume2, Square } from 'lucide-react'
 import { useQuoteOfDay } from '@/hooks/useQuoteOfDay'
 import { formatYear } from '@/lib/utils'
 import { useNarration } from '@/context/NarrationContext'
 import { useApp } from '@/context/AppContext'
 import { getQuoteSource, getQuoteText } from '@/data/quotes'
+import AnimatedQuote from '@/components/quotes/AnimatedQuote'
 
 const prefersReducedMotion =
   typeof window !== 'undefined' &&
   typeof window.matchMedia === 'function' &&
   window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-const container: Variants = prefersReducedMotion
-  ? { hidden: {}, show: {} }
-  : {
-      hidden: {},
-      show: { transition: { staggerChildren: 0.04, delayChildren: 0.1 } },
-    }
-
-const word: Variants = prefersReducedMotion
-  ? { hidden: { opacity: 1, y: 0 }, show: { opacity: 1, y: 0 } }
-  : {
-      hidden: { opacity: 0, y: 12 },
-      show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
-    }
-
 export default function QuoteOfDay() {
   const { quote, philosopher } = useQuoteOfDay()
   const { activeQuoteId, isNarrating, toggle } = useNarration()
   const { t, locale } = useApp()
   const narratingThis = isNarrating && activeQuoteId === quote.id
-  const words = getQuoteText(quote, locale).split(' ')
 
   return (
     <section className="relative mx-auto flex w-full max-w-3xl flex-col items-center overflow-hidden px-4 py-16 text-center sm:py-24">
@@ -76,22 +62,10 @@ export default function QuoteOfDay() {
       </motion.div>
 
       {/* Quote text — word stagger reveal */}
-      <motion.blockquote
-        variants={container}
-        initial="hidden"
-        animate="show"
+      <AnimatedQuote
+        text={getQuoteText(quote, locale)}
         className="relative z-10 font-serif text-3xl italic leading-snug text-content sm:text-5xl"
-      >
-        {words.map((w, i) => (
-          <motion.span
-            key={`${i}-${w}`}
-            variants={word}
-            className="mr-[0.25em] inline-block"
-          >
-            {i === 0 ? `“${w}` : i === words.length - 1 ? `${w}”` : w}
-          </motion.span>
-        ))}
-      </motion.blockquote>
+      />
 
       {/* Attribution */}
       <motion.div
@@ -137,3 +111,4 @@ export default function QuoteOfDay() {
     </section>
   )
 }
+

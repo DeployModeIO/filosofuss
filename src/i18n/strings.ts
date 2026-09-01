@@ -22,6 +22,10 @@ const es: Dict = {
   // Tema
   'theme.toLight': 'Activar modo claro',
   'theme.toDark': 'Activar modo oscuro',
+  'theme.dark': 'Modo oscuro',
+  'theme.light': 'Modo claro',
+  'theme.paper': 'Modo papel',
+  'theme.label': 'Seleccionar tema',
 
   // Idioma
   'lang.toggle': 'Cambiar idioma',
@@ -124,6 +128,18 @@ const es: Dict = {
   'footer.made': 'Hecho con',
   'footer.andReact': 'y React',
   'footer.meta': '{n} citas · {m} filósofos · © {y} Filosofuss',
+
+  // Modo zen / lectura enfocada
+  'zen.enter': 'Modo zen',
+  'zen.close': 'Salir del modo zen',
+  'zen.next': 'Siguiente cita',
+  'zen.prev': 'Cita anterior',
+  'zen.listen': 'Escuchar cita',
+  'zen.stop': 'Detener',
+  'zen.fontLarger': 'Aumentar tamaño de letra',
+  'zen.fontSmaller': 'Reducir tamaño de letra',
+  'zen.serif': 'Cambiar tipografía',
+  'zen.label': 'Lectura enfocada',
 }
 
 const en: Dict = {
@@ -140,6 +156,10 @@ const en: Dict = {
   // Theme
   'theme.toLight': 'Switch to light mode',
   'theme.toDark': 'Switch to dark mode',
+  'theme.dark': 'Dark mode',
+  'theme.light': 'Light mode',
+  'theme.paper': 'Paper mode',
+  'theme.label': 'Select theme',
 
   // Language
   'lang.toggle': 'Change language',
@@ -242,6 +262,18 @@ const en: Dict = {
   'footer.made': 'Made with',
   'footer.andReact': 'and React',
   'footer.meta': '{n} quotes · {m} philosophers · © {y} Filosofuss',
+
+  // Zen mode / focused reading
+  'zen.enter': 'Zen mode',
+  'zen.close': 'Exit zen mode',
+  'zen.next': 'Next quote',
+  'zen.prev': 'Previous quote',
+  'zen.listen': 'Listen to quote',
+  'zen.stop': 'Stop',
+  'zen.fontLarger': 'Increase font size',
+  'zen.fontSmaller': 'Decrease font size',
+  'zen.serif': 'Toggle typography',
+  'zen.label': 'Focused reading',
 }
 
 const dictionaries: Record<Locale, Dict> = { es, en }
