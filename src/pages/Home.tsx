@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { quotes } from '@/data/quotes'
 import { shuffle } from '@/lib/utils'
 import Hero from '@/components/sections/Hero'
@@ -9,12 +10,8 @@ import QuoteCard from '@/components/quotes/QuoteCard'
 import type { Quote } from '@/types'
 import { useApp } from '@/context/AppContext'
 
-const reduceMotion =
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
 export default function Home() {
+  const reduceMotion = usePrefersReducedMotion()
   const { t } = useApp()
   const featured = useState(() => shuffle(quotes).slice(0, 6))[0]
 
@@ -25,14 +22,14 @@ export default function Home() {
       <QuoteOfDay />
 
       {/* Citas destacadas */}
-      <motion.section
+      <m.section
         initial={reduceMotion ? false : { opacity: 0, y: 20 }}
         whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-40px' }}
         transition={{ duration: 0.5 }}
         className="relative mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 sm:py-24"
       >
-        <motion.header
+        <m.header
           initial={reduceMotion ? false : { opacity: 0, y: 20 }}
           whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-40px' }}
@@ -49,17 +46,17 @@ export default function Home() {
           <p className="mt-4 text-muted">
             {t('home.featured.subtitle')}
           </p>
-        </motion.header>
+        </m.header>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {featured.map((quote: Quote, i: number) => (
             <QuoteCard key={quote.id} quote={quote} index={i} />
           ))}
         </div>
-      </motion.section>
+      </m.section>
 
       {/* CTA final */}
-      <motion.section
+      <m.section
         initial={reduceMotion ? false : { opacity: 0, y: 20 }}
         whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-40px' }}
@@ -72,7 +69,7 @@ export default function Home() {
         <Link to="/filosofos" className="btn-ghost text-base">
           {t('home.meetPhilosophers')}
         </Link>
-      </motion.section>
+      </m.section>
     </>
   )
 }

@@ -1,15 +1,11 @@
 import { useState } from 'react'
-import { motion, type Variants } from 'framer-motion'
+import { m, type Variants } from 'framer-motion'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { Link } from 'react-router-dom'
 import { ArrowRight, ChevronDown, Quote, Sparkles, Users } from 'lucide-react'
 import { getPhilosopherById, getRandomQuote } from '@/data/quotes'
 import { useApp } from '@/context/AppContext'
 import AnimatedQuote from '@/components/quotes/AnimatedQuote'
-
-const reduceMotion =
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const container: Variants = {
   hidden: {},
@@ -22,6 +18,7 @@ const item: Variants = {
 }
 
 export default function Hero() {
+  const reduceMotion = usePrefersReducedMotion()
   const { t } = useApp()
   const [featured] = useState(() => getRandomQuote())
   const philosopher = getPhilosopherById(featured.philosopherId)
@@ -42,20 +39,20 @@ export default function Hero() {
         className="pointer-events-none absolute right-[20%] top-[24%] h-8 w-8 text-accent-3/40 animate-float-slow"
       />
 
-      <motion.div
+      <m.div
         variants={container}
         initial={reduceMotion ? 'show' : 'hidden'}
         animate="show"
         className="relative z-10 mx-auto flex max-w-4xl flex-col items-center text-center"
       >
         {/* Eyebrow — marca */}
-        <motion.p
+        <m.p
           variants={item}
           className="mb-8 inline-flex items-center gap-2 rounded-full border border-line-soft bg-glass px-4 py-1.5 font-logo text-xs uppercase tracking-[0.3em] text-accent sm:text-sm"
         >
           <Sparkles className="h-4 w-4" />
           Filosofuss
-        </motion.p>
+        </m.p>
 
         {/* Cita monumental */}
         <AnimatedQuote
@@ -64,7 +61,7 @@ export default function Hero() {
         />
 
         {/* Atribución */}
-        <motion.div
+        <m.div
           variants={item}
           className="mt-8 flex flex-col items-center gap-1"
         >
@@ -78,17 +75,17 @@ export default function Hero() {
               </span>
             </>
           )}
-        </motion.div>
+        </m.div>
 
-        <motion.p
+        <m.p
           variants={item}
           className="mt-6 max-w-xl font-serif text-base italic text-muted sm:text-lg"
         >
           {t('hero.subtitle')}
-        </motion.p>
+        </m.p>
 
         {/* CTAs */}
-        <motion.div
+        <m.div
           variants={item}
           className="mt-10 flex flex-col items-center gap-4 sm:flex-row"
         >
@@ -100,8 +97,8 @@ export default function Hero() {
             <Users className="h-5 w-5" />
             {t('hero.meetPhilosophers')}
           </Link>
-        </motion.div>
-      </motion.div>
+        </m.div>
+      </m.div>
 
       {/* Indicador de scroll */}
       <div

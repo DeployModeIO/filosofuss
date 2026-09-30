@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m } from 'framer-motion'
 import { Heart, Menu, X } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { cn } from '@/lib/utils'
@@ -147,7 +147,7 @@ export default function Navbar() {
             className="glass-strong grid h-11 w-11 place-items-center rounded-full text-content transition-colors hover:text-accent md:hidden"
           >
             <AnimatePresence mode="wait" initial={false}>
-              <motion.span
+              <m.span
                 key={open ? 'x' : 'menu'}
                 initial={{ opacity: 0, rotate: -90, scale: 0.5 }}
                 animate={{ opacity: 1, rotate: 0, scale: 1 }}
@@ -160,7 +160,7 @@ export default function Navbar() {
                 ) : (
                   <Menu size={18} aria-hidden="true" />
                 )}
-              </motion.span>
+              </m.span>
             </AnimatePresence>
           </button>
         </div>
@@ -168,7 +168,7 @@ export default function Navbar() {
 
       <AnimatePresence>
         {open && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -185,7 +185,7 @@ export default function Navbar() {
                 />
               ))}
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </header>

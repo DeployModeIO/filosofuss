@@ -16,7 +16,9 @@ export default defineConfig({
       output: {
         manualChunks: {
           react: ['react', 'react-dom', 'react-router-dom'],
-          motion: ['framer-motion'],
+          // `framer-motion` NO se agrupa a mano: si se fuerza un único chunk
+          // estático, el feature bundle (domMax) no puede cargarse de forma
+          // asíncrona y `LazyMotion` no aporta ahorro (Task B5 / PERF-04).
           icons: ['lucide-react'],
         },
       },

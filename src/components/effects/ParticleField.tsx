@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
 interface Particle {
   x: number
@@ -34,6 +35,7 @@ function createParticles(width: number, height: number): Particle[] {
 }
 
 export default function ParticleField() {
+  const reduceMotion = usePrefersReducedMotion()
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -41,10 +43,6 @@ export default function ParticleField() {
     if (!canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
-
-    const reduceMotion =
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2)
     let width = window.innerWidth
@@ -131,7 +129,7 @@ export default function ParticleField() {
       window.removeEventListener('resize', onResize)
       document.removeEventListener('visibilitychange', onVisibility)
     }
-  }, [])
+  }, [reduceMotion])
 
   return (
     <canvas

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { Quote as QuoteIcon, Volume2, Square } from 'lucide-react'
 import { useQuoteOfDay } from '@/hooks/useQuoteOfDay'
 import { formatYear } from '@/lib/utils'
@@ -8,12 +9,8 @@ import { useApp } from '@/context/AppContext'
 import { getQuoteSource, getQuoteText } from '@/data/quotes'
 import AnimatedQuote from '@/components/quotes/AnimatedQuote'
 
-const prefersReducedMotion =
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
 export default function QuoteOfDay() {
+  const prefersReducedMotion = usePrefersReducedMotion()
   const { quote, philosopher } = useQuoteOfDay()
   const { activeQuoteId, isNarrating, toggle } = useNarration()
   const { t, locale } = useApp()
@@ -42,7 +39,7 @@ export default function QuoteOfDay() {
       />
 
       {/* Label */}
-      <motion.div
+      <m.div
         initial={prefersReducedMotion ? false : { opacity: 0, y: -8 }}
         animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -59,7 +56,7 @@ export default function QuoteOfDay() {
           aria-hidden="true"
           className="h-px w-8 bg-gradient-to-l from-transparent to-accent"
         />
-      </motion.div>
+      </m.div>
 
       {/* Quote text — word stagger reveal */}
       <AnimatedQuote
@@ -68,7 +65,7 @@ export default function QuoteOfDay() {
       />
 
       {/* Attribution */}
-      <motion.div
+      <m.div
         initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
         animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
         transition={{ delay: 0.6, duration: 0.5 }}
@@ -84,10 +81,10 @@ export default function QuoteOfDay() {
           </span>
         )}
         {quote.source && <span className="text-xs italic text-muted">— {getQuoteSource(quote, locale)}</span>}
-      </motion.div>
+      </m.div>
 
       {/* CTA */}
-      <motion.div
+      <m.div
         initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
         animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
         transition={{ delay: 0.8, duration: 0.5 }}
@@ -107,7 +104,7 @@ export default function QuoteOfDay() {
             {narratingThis ? t('qod.stop') : t('qod.listenShort')}
           </button>
         </div>
-      </motion.div>
+      </m.div>
     </section>
   )
 }

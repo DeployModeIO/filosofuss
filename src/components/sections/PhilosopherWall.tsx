@@ -1,17 +1,13 @@
-import { useEffect, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useEffect, useMemo, useState } from 'react'
+import { m, AnimatePresence } from 'framer-motion'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { BookOpen, Calendar, MapPin, X } from 'lucide-react'
 import { philosophers } from '@/data/philosophers'
 import { getQuotesByPhilosopher } from '@/data/quotes'
-import type { Philosopher } from '@/types'
+import type { Philosopher, Quote } from '@/types'
 import { cn, formatYear, hashCode } from '@/lib/utils'
 import { useApp } from '@/context/AppContext'
 import QuoteCard from '@/components/quotes/QuoteCard'
-
-const reduceMotion =
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const GRADIENTS = [
   'from-accent to-accent-2',
@@ -39,6 +35,7 @@ function gradientFor(id: string): string {
 }
 
 export default function PhilosopherWall() {
+  const reduceMotion = usePrefersReducedMotion()
   const { t } = useApp()
   const [selected, setSelected] = useState<Philosopher | null>(null)
 
@@ -56,11 +53,21 @@ export default function PhilosopherWall() {
     }
   }, [selected])
 
-  const selectedQuotes = selected ? getQuotesByPhilosopher(selected.id) : []
+  // Mapa id → citas precomputado una sola vez (Task B6), en lugar de filtrar
+  // el corpus por cada filósofo en cada render.
+  const quotesByPhilosopher = useMemo<Map<string, Quote[]>>(() => {
+    const map = new Map<string, Quote[]>()
+    for (const p of philosophers) map.set(p.id, getQuotesByPhilosopher(p.id))
+    return map
+  }, [])
+
+  const selectedQuotes = selected
+    ? quotesByPhilosopher.get(selected.id) ?? []
+    : []
 
   return (
     <section className="relative mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <motion.header
+      <m.header
         initial={reduceMotion ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -76,13 +83,13 @@ export default function PhilosopherWall() {
         <p className="mt-4 text-muted">
           {t('wall.subtitle', { n: philosophers.length })}
         </p>
-      </motion.header>
+      </m.header>
 
       <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
         {philosophers.map((p, i) => {
-          const count = getQuotesByPhilosopher(p.id).length
+          const count = quotesByPhilosopher.get(p.id)?.length ?? 0
           return (
-            <motion.button
+            <m.button
               key={p.id}
               type="button"
               onClick={() => setSelected(p)}
@@ -110,14 +117,14 @@ export default function PhilosopherWall() {
                <span className="text-xs font-medium text-accent">
                 {count} {count === 1 ? t('wall.quote') : t('wall.quotes')}
               </span>
-            </motion.button>
+            </m.button>
           )
         })}
       </div>
 
       <AnimatePresence>
         {selected && (
-          <motion.div
+          <m.div
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -129,7 +136,7 @@ export default function PhilosopherWall() {
               onClick={() => setSelected(null)}
               aria-hidden="true"
             />
-            <motion.div
+            <m.div
               role="dialog"
               aria-modal="true"
               aria-label={t('wall.sheetOf', { name: selected.fullName })}
@@ -201,8 +208,8 @@ export default function PhilosopherWall() {
                   ))}
                 </div>
               </div>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
     </section>

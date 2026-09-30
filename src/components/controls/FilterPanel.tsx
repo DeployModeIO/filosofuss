@@ -1,15 +1,11 @@
 import { useState } from 'react'
 import { SlidersHorizontal, X } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'framer-motion'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { cn } from '@/lib/utils'
 import { allEras, allSchools, allTags } from '@/data/quotes'
 import { useApp } from '@/context/AppContext'
 import type { Tag } from '@/types'
-
-const reduceMotion =
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 export interface FilterPanelProps {
   selectedEra: string | null
@@ -88,6 +84,7 @@ export default function FilterPanel({
   onClear,
 }: FilterPanelProps) {
   const { t } = useApp()
+  const reduceMotion = usePrefersReducedMotion()
   const [open, setOpen] = useState(false)
   const activeCount = [selectedEra, selectedSchool, selectedTag].filter(
     Boolean,
@@ -150,7 +147,7 @@ export default function FilterPanel({
       {/* Móvil: colapsable */}
       <AnimatePresence initial={false}>
         {open && (
-          <motion.div
+          <m.div
             key="mobile-filters"
             className="flex flex-col gap-4 overflow-hidden sm:hidden"
             initial={reduceMotion ? { opacity: 1 } : { height: 0, opacity: 0 }}
@@ -161,7 +158,7 @@ export default function FilterPanel({
             transition={{ duration: reduceMotion ? 0 : 0.3, ease: 'easeInOut' }}
           >
             {groups}
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

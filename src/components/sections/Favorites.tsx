@@ -1,4 +1,5 @@
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'framer-motion'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { Link } from 'react-router-dom'
 import { Heart, Trash2 } from 'lucide-react'
 import { useApp } from '@/context/AppContext'
@@ -6,12 +7,8 @@ import { getQuoteById } from '@/data/quotes'
 import type { Quote } from '@/types'
 import QuoteCard from '@/components/quotes/QuoteCard'
 
-const reduceMotion =
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
 export default function Favorites() {
+  const reduceMotion = usePrefersReducedMotion()
   const { favorites, favoritesCount, clearFavorites, t } = useApp()
   const favQuotes: Quote[] = favorites
     .map((id) => getQuoteById(id))
@@ -29,7 +26,7 @@ export default function Favorites() {
 
   return (
     <section className="relative mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <motion.header
+      <m.header
         initial={reduceMotion ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -46,10 +43,10 @@ export default function Favorites() {
             ? t('fav.empty')
             : `${favoritesCount} ${favoritesCount === 1 ? t('fav.savedOne') : t('fav.savedMany')}`}
         </p>
-      </motion.header>
+      </m.header>
 
       {favQuotes.length === 0 ? (
-        <motion.div
+        <m.div
           initial={reduceMotion ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
@@ -67,7 +64,7 @@ export default function Favorites() {
           <Link to="/explorar" className="btn-primary">
             {t('fav.explore')}
           </Link>
-        </motion.div>
+        </m.div>
       ) : (
         <>
           <div className="mt-10 flex justify-center">
@@ -80,13 +77,13 @@ export default function Favorites() {
               {t('fav.clear')}
             </button>
           </div>
-          <motion.div
+          <m.div
             layout
             className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
           >
             <AnimatePresence mode="popLayout">
               {favQuotes.map((q, i) => (
-                <motion.div
+                <m.div
                   key={q.id}
                   layout
                   initial={reduceMotion ? false : { opacity: 0, scale: 0.96 }}
@@ -95,10 +92,10 @@ export default function Favorites() {
                   transition={{ duration: reduceMotion ? 0 : 0.25 }}
                 >
                   <QuoteCard quote={q} index={i} />
-                </motion.div>
+                </m.div>
               ))}
             </AnimatePresence>
-          </motion.div>
+          </m.div>
         </>
       )}
     </section>

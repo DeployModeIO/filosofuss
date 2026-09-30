@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from 'react'
 import type { ReactNode } from 'react'
 import { useLocalStorage } from '@/lib/storage'
@@ -19,7 +20,6 @@ export interface AudioContextValue {
   volume: number
   isMuted: boolean
   duration: number
-  currentTime: number
   play: () => void
   pause: () => void
   togglePlay: () => void
@@ -34,6 +34,42 @@ const AudioContext = createContext<AudioContextValue | undefined>(undefined)
 
 const VOLUME_KEY = 'filosofuss:volume'
 const INITIAL_VOLUME = 0.4
+
+/**
+ * Progreso de reproducción fuera del contexto raíz (Task B7 / PERF-10).
+ * `timeupdate` emite ~4 Hz; mantenerlo en el `value` del provider re-renderiza
+ * todo el árbol mientras suena. Con un store externo + `useSyncExternalStore`
+ * sólo se re-renderiza quien consume `useAudioProgress` (el AudioPlayer).
+ */
+let audioProgress = 0
+const progressListeners = new Set<() => void>()
+
+function subscribeProgress(listener: () => void): () => void {
+  progressListeners.add(listener)
+  return () => {
+    progressListeners.delete(listener)
+  }
+}
+
+function getProgressSnapshot(): number {
+  return audioProgress
+}
+
+function setProgress(next: number): void {
+  const value = Number.isFinite(next) && next > 0 ? next : 0
+  if (value === audioProgress) return
+  audioProgress = value
+  for (const listener of progressListeners) listener()
+}
+
+/** Tiempo de reproducción actual, aislado del resto del árbol (Task B7). */
+export function useAudioProgress(): number {
+  return useSyncExternalStore(
+    subscribeProgress,
+    getProgressSnapshot,
+    getProgressSnapshot,
+  )
+}
 
 export function AudioProvider({ children }: { children: ReactNode }) {
   // Una sola instancia de <audio>, creada perezosamente (sólo en cliente).
@@ -50,7 +86,6 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   )
   const [isMuted, setIsMuted] = useState(false)
   const [duration, setDuration] = useState(0)
-  const [currentTime, setCurrentTime] = useState(0)
 
   // Refs para evitar closures obsoletas dentro de los manejadores del elemento.
   const trackIndexRef = useRef(0)
@@ -74,7 +109,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     if (loadedSrcRef.current !== track.src) {
       audio.src = track.src
       loadedSrcRef.current = track.src
-      setCurrentTime(0)
+      setProgress(0)
       setDuration(0)
     }
     const maybePromise = audio.play()
@@ -152,7 +187,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       errorCountRef.current = 0
     }
     const onPause = () => setIsPlaying(false)
-    const onTimeUpdate = () => setCurrentTime(audio.currentTime || 0)
+    const onTimeUpdate = () => setProgress(audio.currentTime || 0)
     const onLoadedMetadata = () => setDuration(audio.duration || 0)
     const onDurationChange = () => setDuration(audio.duration || 0)
     const onVolumeChange = () => setIsMuted(audio.muted)
@@ -205,7 +240,6 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       volume,
       isMuted,
       duration,
-      currentTime,
       play,
       pause,
       togglePlay,
@@ -222,7 +256,6 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       volume,
       isMuted,
       duration,
-      currentTime,
       play,
       pause,
       togglePlay,

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m } from 'framer-motion'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import {
   ChevronLeft,
   ChevronRight,
@@ -22,14 +23,10 @@ import {
 import { useLocalStorage } from '@/lib/storage'
 import { cn } from '@/lib/utils'
 
-const reduceMotion =
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
 const MAX_SIZE = 5
 
 export default function ZenMode() {
+  const reduceMotion = usePrefersReducedMotion()
   const { zenQuoteId, closeZen, openZen, t, locale } = useApp()
   const { activeQuoteId, isNarrating, toggle } = useNarration()
   const [size, setSize] = useLocalStorage<number>('filosofuss:zen:size', 2)
@@ -73,7 +70,7 @@ export default function ZenMode() {
   return (
     <AnimatePresence>
       {quote && (
-        <motion.div
+        <m.div
           key="zen"
           role="dialog"
           aria-modal="true"
@@ -207,7 +204,7 @@ export default function ZenMode() {
               <Type size={18} aria-hidden="true" />
             </button>
           </div>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   )

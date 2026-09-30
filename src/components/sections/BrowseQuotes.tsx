@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { m } from 'framer-motion'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
+import { useWindowVirtualizer } from '@tanstack/react-virtual'
 import { Search, X } from 'lucide-react'
 import { quotes, searchQuotes, getPhilosopherById } from '@/data/quotes'
 import type { Quote, Tag } from '@/types'
@@ -9,31 +11,39 @@ import FilterPanel from '@/components/controls/FilterPanel'
 import QuoteCard from '@/components/quotes/QuoteCard'
 import { useApp } from '@/context/AppContext'
 
-const reduceMotion =
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
+/** Columnas de la rejilla según el ancho disponible (sm=640, lg=1024). */
+function columnsForWidth(width: number): number {
+  if (width >= 1024) return 3
+  if (width >= 640) return 2
+  return 1
+}
+
+function groupRows(items: Quote[], columns: number): Quote[][] {
+  const rows: Quote[][] = []
+  for (let i = 0; i < items.length; i += columns) {
+    rows.push(items.slice(i, i + columns))
+  }
+  return rows
+}
 
 export default function BrowseQuotes() {
+  const reduceMotion = usePrefersReducedMotion()
   const { t } = useApp()
   const [query, setQuery] = useState('')
-  const [debounced, setDebounced] = useState('')
   const [selectedEra, setSelectedEra] = useState<string | null>(null)
   const [selectedSchool, setSelectedSchool] = useState<string | null>(null)
   const [selectedTag, setSelectedTag] = useState<Tag | null>(null)
 
-  // Orden base estable (barajado una sola vez al montar) para que las
-  // animaciones de `layout` no salten entre renderizados.
+  // El input se actualiza de forma síncrona (query) pero el filtrado pesado usa
+  // el valor diferido: teclear no bloquea el hilo principal (PERF-06).
+  const deferredQuery = useDeferredValue(query)
+
+  // Orden base estable (barajado una sola vez al montar).
   const [baseOrder] = useState(() => shuffle(quotes))
 
-  useEffect(() => {
-    const t = setTimeout(() => setDebounced(query), 200)
-    return () => clearTimeout(t)
-  }, [query])
-
   const results = useMemo<Quote[]>(() => {
-    const searching = debounced.trim().length > 0
-    let list: Quote[] = searching ? searchQuotes(debounced) : baseOrder
+    const searching = deferredQuery.trim().length > 0
+    let list: Quote[] = searching ? searchQuotes(deferredQuery) : baseOrder
     if (selectedEra) {
       list = list.filter(
         (q) => getPhilosopherById(q.philosopherId)?.era === selectedEra,
@@ -48,15 +58,55 @@ export default function BrowseQuotes() {
       list = list.filter((q) => q.tags.includes(selectedTag))
     }
     return list
-  }, [debounced, selectedEra, selectedSchool, selectedTag, baseOrder])
+  }, [deferredQuery, selectedEra, selectedSchool, selectedTag, baseOrder])
 
-  const clearAll = () => {
+  // Rejilla responsive: filas virtualizadas (cada fila agrupa N tarjetas).
+  const listRef = useRef<HTMLDivElement>(null)
+  const [columns, setColumns] = useState(() =>
+    typeof window === 'undefined' ? 1 : columnsForWidth(window.innerWidth),
+  )
+
+  useEffect(() => {
+    const el = listRef.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const update = () => setColumns(columnsForWidth(el.clientWidth))
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  const rows = useMemo(() => groupRows(results, columns), [results, columns])
+
+  // `scrollMargin` = offset del inicio de la lista respecto al documento.
+  const [scrollMargin, setScrollMargin] = useState(0)
+
+  const rowVirtualizer = useWindowVirtualizer({
+    count: rows.length,
+    estimateSize: () => 360,
+    overscan: 4,
+    scrollMargin,
+  })
+
+  useLayoutEffect(() => {
+    const el = listRef.current
+    if (!el) return
+    const update = () => setScrollMargin(el.getBoundingClientRect().top + window.scrollY)
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [rows.length, columns])
+
+  useEffect(() => {
+    rowVirtualizer.measure()
+  }, [rowVirtualizer, rows.length, columns])
+
+  const clearAll = useCallback(() => {
     setQuery('')
-    setDebounced('')
     setSelectedEra(null)
     setSelectedSchool(null)
     setSelectedTag(null)
-  }
+  }, [])
 
   const chips: { label: string; clear: () => void }[] = []
   if (selectedEra) {
@@ -73,14 +123,14 @@ export default function BrowseQuotes() {
   }
 
   const hasAny =
-    debounced.trim().length > 0 ||
+    deferredQuery.trim().length > 0 ||
     selectedEra !== null ||
     selectedSchool !== null ||
     selectedTag !== null
 
   return (
     <section className="relative mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <motion.header
+      <m.header
         initial={reduceMotion ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -96,7 +146,7 @@ export default function BrowseQuotes() {
         <p className="mt-4 text-muted">
           {t('browse.subtitle')}
         </p>
-      </motion.header>
+      </m.header>
 
       <div className="mx-auto mt-10 flex max-w-3xl flex-col gap-5">
         <SearchBar query={query} onQuery={setQuery} />
@@ -161,25 +211,45 @@ export default function BrowseQuotes() {
           )}
         </div>
       ) : (
-        <motion.div
-          layout
-          className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-        >
-          <AnimatePresence mode="popLayout">
-            {results.map((q, i) => (
-              <motion.div
-                key={q.id}
-                layout
-                initial={reduceMotion ? false : { opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={reduceMotion ? undefined : { opacity: 0, scale: 0.96 }}
-                transition={{ duration: reduceMotion ? 0 : 0.25 }}
-              >
-                <QuoteCard quote={q} index={i} />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
+        <div ref={listRef} className="mt-8">
+          <div
+            style={{
+              height: rowVirtualizer.getTotalSize(),
+              position: 'relative',
+              width: '100%',
+            }}
+          >
+            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+              const row = rows[virtualRow.index]
+              if (!row) return null
+              return (
+                <div
+                  key={virtualRow.key}
+                  ref={rowVirtualizer.measureElement}
+                  data-index={virtualRow.index}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${virtualRow.start - scrollMargin}px)`,
+                  }}
+                >
+                  <div
+                    className="grid gap-6 pb-6"
+                    style={{
+                      gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+                    }}
+                  >
+                    {row.map((q) => (
+                      <QuoteCard key={q.id} quote={q} variant="list" />
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
       )}
     </section>
   )

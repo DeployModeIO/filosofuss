@@ -1,9 +1,5 @@
-import { motion } from 'framer-motion'
-
-const prefersReducedMotion =
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
+import { m } from 'framer-motion'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
 interface AuroraBlob {
   bg: string
@@ -60,6 +56,7 @@ const BLOBS: AuroraBlob[] = [
 ]
 
 export default function AuroraBackground() {
+  const prefersReducedMotion = usePrefersReducedMotion()
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
       {BLOBS.map((blob, i) =>
@@ -78,7 +75,7 @@ export default function AuroraBackground() {
             }}
           />
         ) : (
-          <motion.div
+          <m.div
             key={i}
             className="absolute rounded-full"
             style={{

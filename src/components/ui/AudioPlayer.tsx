@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m } from 'framer-motion'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import {
   ListMusic,
   Pause,
@@ -11,15 +12,10 @@ import {
   VolumeX,
   X,
 } from 'lucide-react'
-import { useAudio } from '@/context/AudioContext'
+import { useAudio, useAudioProgress } from '@/context/AudioContext'
 import { useApp } from '@/context/AppContext'
 import { tracks } from '@/data/tracks'
 import { cn } from '@/lib/utils'
-
-const reduceMotion =
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 function formatTime(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds <= 0) return '0:00'
@@ -29,13 +25,14 @@ function formatTime(seconds: number): string {
 }
 
 function Equalizer() {
+  const reduceMotion = usePrefersReducedMotion()
   return (
     <span className="flex h-4 items-end gap-[2px]" aria-hidden="true">
       {[0, 1, 2, 3].map((i) =>
         reduceMotion ? (
           <span key={i} className="h-3 w-[2px] rounded-full bg-accent" />
         ) : (
-          <motion.span
+          <m.span
             key={i}
             className="h-4 w-[2px] origin-bottom rounded-full bg-accent"
             animate={{ scaleY: [0.25, 1, 0.5, 0.85, 0.25] }}
@@ -77,6 +74,7 @@ function IconButton({
 }
 
 export default function AudioPlayer() {
+  const reduceMotion = usePrefersReducedMotion()
   const {
     isPlaying,
     currentTrack,
@@ -84,7 +82,6 @@ export default function AudioPlayer() {
     volume,
     isMuted,
     duration,
-    currentTime,
     togglePlay,
     next,
     prev,
@@ -94,6 +91,8 @@ export default function AudioPlayer() {
   } = useAudio()
   const { t } = useApp()
   const [expanded, setExpanded] = useState(false)
+  // Suscripción aislada: sólo este componente re-renderiza a ~4 Hz (Task B7).
+  const currentTime = useAudioProgress()
 
   const progress =
     duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0
@@ -136,7 +135,7 @@ export default function AudioPlayer() {
       {/* Panel expandido */}
       <AnimatePresence initial={false}>
         {expanded && (
-          <motion.div
+          <m.div
             key="audio-panel"
             role="dialog"
             aria-label={t('audio.aria')}
@@ -257,7 +256,7 @@ export default function AudioPlayer() {
                 )
               })}
             </ul>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>
