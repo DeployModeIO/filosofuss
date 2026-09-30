@@ -3,6 +3,53 @@
 @tailwind utilities;
 
 /* ============================================================
+   FUENTES SELF-HOST (subset latin) — Task B8 (PERF-11 / SEC-25)
+   Archivos en public/fonts/. Declaración local sustituye a Google Fonts.
+   ============================================================ */
+@font-face {
+  font-family: 'Cinzel';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/cinzel-wordmark.woff2') format('woff2');
+  unicode-range: U+0046, U+0049, U+004C, U+004F, U+0053, U+0055, U+0066, U+0069, U+006C, U+006F,
+    U+0073, U+0075;
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/cormorant-garamond-normal.woff2') format('woff2');
+  unicode-range: U+0020-007E, U+00A1, U+00A9, U+00AB, U+00B7, U+00BB, U+00BF, U+00C1, U+00C9,
+    U+00CD, U+00E1, U+00E9, U+00ED, U+00F1, U+00F3, U+00F6, U+00F8, U+00FA, U+00FC, U+2013-2014,
+    U+2018-2019, U+201C-201D, U+2026;
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/cormorant-garamond-italic.woff2') format('woff2');
+  unicode-range: U+0020-007E, U+00A1, U+00A9, U+00AB, U+00B7, U+00BB, U+00BF, U+00C1, U+00C9,
+    U+00CD, U+00E1, U+00E9, U+00ED, U+00F1, U+00F3, U+00F6, U+00F8, U+00FA, U+00FC, U+2013-2014,
+    U+2018-2019, U+201C-201D, U+2026;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/inter.woff2') format('woff2');
+  unicode-range: U+0020-007E, U+00A1, U+00A9, U+00AB, U+00B7, U+00BB, U+00BF, U+00C1, U+00C9,
+    U+00CD, U+00E1, U+00E9, U+00ED, U+00F1, U+00F3, U+00F6, U+00F8, U+00FA, U+00FC, U+2013-2014,
+    U+2018-2019, U+201C-201D, U+2026;
+}
+
+/* ============================================================
    FILOSOFUSS — DESIGN SYSTEM
    Dark-first. Light theme overrides via html.light.
    ============================================================ */
@@ -33,7 +80,7 @@
 
   /* Typography */
   --font-logo: 'Cinzel', serif;
-  --font-display: 'Playfair Display', serif;
+  --font-display: 'Cormorant Garamond', serif;
   --font-serif: 'Cormorant Garamond', serif;
   --font-sans: 'Inter', system-ui, sans-serif;
 }

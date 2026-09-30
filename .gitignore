@@ -31,3 +31,6 @@ scripts/.translate-progress.json
 *.njsproj
 *.sln
 *.sw?
+
+# Serena tool cache (no versionar)
+.serena/

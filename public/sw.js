@@ -5,7 +5,7 @@
  *   - Precacheo del app shell al instalar.
  *   - Navegaciones: network-first (fallback a /index.html y /).
  *   - Assets del mismo origen (JS/CSS/img/audio): stale-while-revalidate.
- *   - Google Fonts: network-first con caché de respaldo.
+ *   - Resto de peticiones (cross-origin): pasan directas a la red.
  * ===================================================================== */
 
 // Nombre de caché versionado por build. `public/` es estático, así que la
@@ -15,7 +15,7 @@ const BUILD = '2026-09-30';
 const CACHE = `filosofuss-${BUILD}`;
 
 // App shell que se precachea al instalar. Rutas absolutas (hosting en raíz).
-// El audio (MP3) NO se precachea: se cachea on-demand al reproducir (SWR).
+// El audio (.m4a) NO se precachea: se cachea on-demand al reproducir (SWR).
 const PRECACHE_URLS = [
   '/',
   '/index.html',
@@ -104,28 +104,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2) Google Fonts: network-first con caché de respaldo (offline tras 1ª visita).
-  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
-    event.respondWith(
-      (async () => {
-        try {
-          const fresh = await fetch(request);
-          if (fresh && fresh.ok) {
-            const cache = await caches.open(CACHE);
-            cache.put(request, fresh.clone()).catch(() => {});
-          }
-          return fresh;
-        } catch (err) {
-          const cache = await caches.open(CACHE);
-          const cached = await cache.match(request);
-          return cached || fetch(request).catch(() => Response.error());
-        }
-      })()
-    );
-    return;
-  }
-
-  // 3) Recursos del mismo origen (JS/CSS/imagen/audio): stale-while-revalidate.
+  // 2) Recursos del mismo origen (JS/CSS/imagen/audio): stale-while-revalidate.
   if (sameOrigin) {
     event.respondWith(
       (async () => {
@@ -147,6 +126,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 4) Resto de peticiones (cross-origin no gestionadas): navegador normal.
+  // 3) Resto de peticiones (cross-origin no gestionadas): navegador normal.
   //    No usamos event.respondWith: la petición pasa a la red por defecto.
 });
