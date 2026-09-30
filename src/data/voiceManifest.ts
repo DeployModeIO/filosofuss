@@ -1028,10 +1028,10 @@ export const narratedEnQuoteIds: ReadonlySet<string> = new Set<string>([
 /** Devuelve la ruta pública del MP3 de una cita en el idioma dado, o null. */
 export function getNarrationSrc(quoteId: string, lang: VoiceLang = 'es'): string | null {
   if (lang === 'es' && narratedEsQuoteIds.has(quoteId)) {
-    return `/audio/voice/es/${quoteId}.mp3`
+    return `/audio/voice/es/${quoteId}.m4a`
   }
   if (lang === 'en' && narratedEnQuoteIds.has(quoteId)) {
-    return `/audio/voice/en/${quoteId}.mp3`
+    return `/audio/voice/en/${quoteId}.m4a`
   }
   return null
 }
