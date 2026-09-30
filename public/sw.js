@@ -8,19 +8,32 @@
  *   - Google Fonts: network-first con caché de respaldo.
  * ===================================================================== */
 
-const CACHE = 'filosofuss-v1';
+// Nombre de caché versionado por build. `public/` es estático, así que la
+// versión se mantiene aquí: al publicar una release, actualiza BUILD (fecha o
+// hash) para invalidar las cachés antiguas (el `activate` ya borra las demás).
+const BUILD = '2026-09-30';
+const CACHE = `filosofuss-${BUILD}`;
 
 // App shell que se precachea al instalar. Rutas absolutas (hosting en raíz).
+// El audio (MP3) NO se precachea: se cachea on-demand al reproducir (SWR).
 const PRECACHE_URLS = [
   '/',
   '/index.html',
   '/manifest.webmanifest',
-  '/audio/emand_edroff-ishopanishad_intimate-480016.mp3',
-  '/audio/konstantinpazuzustudio-rain-on-the-roof-neoclassical-piano-514674.mp3',
-  '/audio/meditativetiger-zen-master-bowl-wisdom-388631.mp3',
-  '/audio/prettyjohn1-calming-zen-537655.mp3',
-  '/audio/raspberrymusic-the-way-to-yourself-piano-cinematic-spiritual-410697.mp3',
 ];
+
+// Fallback offline mínimo inline (evita depender de un asset externo que no
+// forma parte del precache). Se sirve solo cuando no hay red ni app shell cacheado.
+const OFFLINE_HTML =
+  '<!doctype html><html lang="es"><head><meta charset="utf-8">' +
+  '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+  '<title>Sin conexión · Filosofuss</title>' +
+  '<style>body{margin:0;min-height:100svh;display:flex;align-items:center;' +
+  'justify-content:center;background:#0A0A0F;color:#ECE8E1;' +
+  'font:16px/1.6 system-ui,sans-serif;text-align:center;padding:24px}' +
+  'a{color:#C9A96A}</style></head><body><main><h1>Sin conexión</h1>' +
+  '<p>Comprueba tu conexión y vuelve a intentarlo.</p>' +
+  '<p><a href="./">Reintentar</a></p></main></body></html>';
 
 // --- Instalación: precacheo del app shell. ---------------------------
 self.addEventListener('install', (event) => {
@@ -67,17 +80,24 @@ self.addEventListener('fetch', (event) => {
       (async () => {
         try {
           const fresh = await fetch(request);
-          const cache = await caches.open(CACHE);
-          cache.put('/index.html', fresh.clone()).catch(() => {});
+          // Solo cacheamos respuestas correctas y de tipo HTML (SEC-26/W-01):
+          // nunca errores, redirecciones ni respuestas opacas como app shell.
+          const contentType = fresh.headers.get('content-type') || '';
+          if (fresh.ok && contentType.includes('text/html')) {
+            const cache = await caches.open(CACHE);
+            cache.put('/index.html', fresh.clone()).catch(() => {});
+          }
           return fresh;
         } catch (err) {
-          // Sin red: servimos el app shell cacheado.
+          // Sin red: app shell cacheado o fallback offline mínimo inline.
           const cache = await caches.open(CACHE);
-          return (
-            (await cache.match('/index.html')) ||
-            (await cache.match('/')) ||
-            fetch(request).catch(() => Response.error())
-          );
+          const cached =
+            (await cache.match('/index.html')) || (await cache.match('/'));
+          if (cached) return cached;
+          return new Response(OFFLINE_HTML, {
+            status: 200,
+            headers: { 'content-type': 'text/html; charset=utf-8' },
+          });
         }
       })()
     );

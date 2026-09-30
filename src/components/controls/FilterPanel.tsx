@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { allEras, allSchools, allTags } from '@/data/quotes'
 import { useApp } from '@/context/AppContext'
+import type { Tag } from '@/types'
 
 const reduceMotion =
   typeof window !== 'undefined' &&
@@ -13,10 +14,10 @@ const reduceMotion =
 export interface FilterPanelProps {
   selectedEra: string | null
   selectedSchool: string | null
-  selectedTag: string | null
+  selectedTag: Tag | null
   onEra: (v: string | null) => void
   onSchool: (v: string | null) => void
-  onTag: (v: string | null) => void
+  onTag: (v: Tag | null) => void
   onClear: () => void
 }
 
@@ -46,16 +47,16 @@ function Pill({
   )
 }
 
-function FilterGroup({
+function FilterGroup<T extends string>({
   title,
   options,
   selected,
   onSelect,
 }: {
   title: string
-  options: string[]
-  selected: string | null
-  onSelect: (v: string | null) => void
+  options: readonly T[]
+  selected: T | null
+  onSelect: (v: T | null) => void
 }) {
   return (
     <div className="flex flex-col gap-2">

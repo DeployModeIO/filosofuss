@@ -69,10 +69,10 @@ export default function PhilosopherWall() {
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
           {t('wall.label')}
         </p>
-        <h2 className="mt-3 font-display text-4xl text-content sm:text-5xl">
+        <h1 className="mt-3 font-display text-4xl text-content sm:text-5xl">
           {t('wall.titleA')}
           <span className="text-gradient-animated">{t('wall.titleB')}</span>
-        </h2>
+        </h1>
         <p className="mt-4 text-muted">
           {t('wall.subtitle', { n: philosophers.length })}
         </p>

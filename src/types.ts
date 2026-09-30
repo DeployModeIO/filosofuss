@@ -53,7 +53,7 @@ export interface Philosopher {
   /** nombre completo, p. ej. "Friedrich Nietzsche" */
   fullName: string;
   /** una de las cadenas de Era definidas arriba */
-  era: string;
+  era: Era;
   /** escuela o movimiento */
   school: string;
   /** nacionalidad, p. ej. "Alemana" */
@@ -74,7 +74,7 @@ export interface Quote {
   /** enlace con Philosopher.id */
   philosopherId: string;
   /** temas del vocabulario controlado (1–3) */
-  tags: string[];
+  tags: Tag[];
   /** obra u origen opcional, p. ej. "Así habló Zaratustra" */
   source?: string;
 }

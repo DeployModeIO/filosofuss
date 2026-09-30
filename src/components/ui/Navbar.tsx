@@ -144,7 +144,7 @@ export default function Navbar() {
             onClick={() => setOpen((v) => !v)}
             aria-label={open ? t('nav.closeMenu') : t('nav.openMenu')}
             aria-expanded={open}
-            className="glass-strong grid h-10 w-10 place-items-center rounded-full text-content transition-colors hover:text-accent md:hidden"
+            className="glass-strong grid h-11 w-11 place-items-center rounded-full text-content transition-colors hover:text-accent md:hidden"
           >
             <AnimatePresence mode="wait" initial={false}>
               <motion.span

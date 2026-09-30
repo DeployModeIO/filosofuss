@@ -135,20 +135,9 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     audio.muted = isMuted
   }, [volume, isMuted])
 
-  // Cuando cambia el índice, carga el nuevo src (para que los metadatos
-  // queden listos aunque esté en pausa). La reproducción la dispara play().
-  useEffect(() => {
-    const audio = audioRef.current
-    if (!audio) return
-    const track = tracks[trackIndex]
-    if (!track) return
-    if (loadedSrcRef.current !== track.src) {
-      audio.src = track.src
-      loadedSrcRef.current = track.src
-      setCurrentTime(0)
-      setDuration(0)
-    }
-  }, [trackIndex])
+  // No se asigna `src` al montar ni al cambiar de pista: el audio no hace
+  // ninguna petición de red hasta que el usuario pulsa play (o la narración/
+  // deep-link pide reproducción). `play()` es quien fija el `src`.
 
   // Adjunta el elemento y sus listeners una sola vez.
   useEffect(() => {
@@ -156,7 +145,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     if (!audio) return
 
     audio.loop = false
-    audio.preload = 'metadata'
+    audio.preload = 'none'
 
     const onPlay = () => {
       setIsPlaying(true)

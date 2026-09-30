@@ -38,9 +38,9 @@ export default function Favorites() {
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
           {t('fav.label')}
         </p>
-        <h2 className="mt-3 font-display text-4xl text-content sm:text-5xl">
+        <h1 className="mt-3 font-display text-4xl text-content sm:text-5xl">
           <span className="text-gradient-animated">{t('fav.title')}</span>
-        </h2>
+        </h1>
         <p className="mt-4 text-muted">
           {favoritesCount === 0
             ? t('fav.empty')

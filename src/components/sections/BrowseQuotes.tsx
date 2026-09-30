@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, X } from 'lucide-react'
 import { quotes, searchQuotes, getPhilosopherById } from '@/data/quotes'
-import type { Quote } from '@/types'
+import type { Quote, Tag } from '@/types'
 import { shuffle } from '@/lib/utils'
 import SearchBar from '@/components/controls/SearchBar'
 import FilterPanel from '@/components/controls/FilterPanel'
@@ -20,7 +20,7 @@ export default function BrowseQuotes() {
   const [debounced, setDebounced] = useState('')
   const [selectedEra, setSelectedEra] = useState<string | null>(null)
   const [selectedSchool, setSelectedSchool] = useState<string | null>(null)
-  const [selectedTag, setSelectedTag] = useState<string | null>(null)
+  const [selectedTag, setSelectedTag] = useState<Tag | null>(null)
 
   // Orden base estable (barajado una sola vez al montar) para que las
   // animaciones de `layout` no salten entre renderizados.
@@ -89,10 +89,10 @@ export default function BrowseQuotes() {
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
           {t('browse.label')}
         </p>
-        <h2 className="mt-3 font-display text-4xl text-content sm:text-5xl">
+        <h1 className="mt-3 font-display text-4xl text-content sm:text-5xl">
           {t('browse.titleA')}
           <span className="text-gradient-animated">{t('browse.titleB')}</span>
-        </h2>
+        </h1>
         <p className="mt-4 text-muted">
           {t('browse.subtitle')}
         </p>

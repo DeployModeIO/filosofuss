@@ -86,6 +86,36 @@ export function formatYear(year: number | null): string {
   return String(year);
 }
 
+const CONNECTORS = new Set([
+  "y",
+  "de",
+  "del",
+  "la",
+  "el",
+  "da",
+  "di",
+  "le",
+  "von",
+]);
+
+/**
+ * Iniciales de un nombre para avatares.
+ * Ignora el contenido entre paréntesis y las partículas (de, von, da…).
+ * @example initials("Simone de Beauvoir") → "SB"
+ * @example initials("Lao-Tsé (Laozi)") → "LT"
+ */
+export function initials(name: string): string {
+  const cleaned = name.replace(/\(.*?\)/g, "").trim();
+  const parts = cleaned
+    .split(/[\s-]+/)
+    .filter((p) => p.length > 0 && !CONNECTORS.has(p.toLowerCase()));
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return (
+    parts[0].charAt(0) + parts[parts.length - 1].charAt(0)
+  ).toUpperCase();
+}
+
 /**
  * Construye la URL compartible de una cita (deep link con ?cita=<id>).
  * Al abrirla, la app reconoce el parámetro y abre la cita en modo lectura.

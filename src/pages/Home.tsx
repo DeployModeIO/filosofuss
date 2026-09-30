@@ -20,6 +20,7 @@ export default function Home() {
 
   return (
     <>
+      <h1 className="sr-only">{t('hero.tagline')}</h1>
       <Hero />
       <QuoteOfDay />
 

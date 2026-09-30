@@ -37,7 +37,7 @@ export default function ThemeToggle() {
             aria-label={t(option.key)}
             title={t(option.key)}
             onClick={() => setTheme(option.value)}
-            className="relative grid h-8 w-8 place-items-center rounded-full transition-colors duration-200 focus-visible:text-accent"
+            className="relative grid h-11 w-11 place-items-center rounded-full transition-colors duration-200 focus-visible:text-accent"
           >
             {active && (
               <motion.span

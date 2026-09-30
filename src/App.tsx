@@ -10,6 +10,7 @@ import AudioPlayer from '@/components/ui/AudioPlayer'
 import ScrollToTop from '@/components/ui/ScrollToTop'
 import ZenMode from '@/components/ui/ZenMode'
 import QuoteDeepLink from '@/components/ui/QuoteDeepLink'
+import ErrorBoundary from '@/components/ui/ErrorBoundary'
 import Home from '@/pages/Home'
 
 // Rutas secundarias cargadas bajo demanda para reducir el bundle inicial.
@@ -38,13 +39,15 @@ export default function App() {
           <Navbar />
           <main className="relative z-0 min-h-screen">
             <Suspense fallback={<RouteFallback />}>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/explorar" element={<BrowseQuotes />} />
-                <Route path="/filosofos" element={<PhilosopherWall />} />
-                <Route path="/favoritos" element={<Favorites />} />
-                <Route path="*" element={<Home />} />
-              </Routes>
+              <ErrorBoundary>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/explorar" element={<BrowseQuotes />} />
+                  <Route path="/filosofos" element={<PhilosopherWall />} />
+                  <Route path="/favoritos" element={<Favorites />} />
+                  <Route path="*" element={<Home />} />
+                </Routes>
+              </ErrorBoundary>
             </Suspense>
           </main>
           <Footer />

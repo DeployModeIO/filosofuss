@@ -122,7 +122,7 @@ export default function AudioPlayer() {
           label={expanded ? t('audio.close') : t('audio.open')}
           onClick={() => setExpanded((v) => !v)}
           className={cn(
-            'glass-strong grid h-10 w-10 place-items-center rounded-full text-content transition-colors duration-300 hover:text-accent focus-visible:text-accent',
+            'glass-strong grid h-11 w-11 place-items-center rounded-full text-content transition-colors duration-300 hover:text-accent focus-visible:text-accent',
           )}
         >
           {expanded ? (
@@ -175,7 +175,7 @@ export default function AudioPlayer() {
               <IconButton
                 label={t('audio.prev')}
                 onClick={prev}
-                className="grid h-9 w-9 place-items-center rounded-full text-muted transition-colors hover:text-accent"
+                className="grid h-11 w-11 place-items-center rounded-full text-muted transition-colors hover:text-accent"
               >
                 <SkipBack size={18} aria-hidden="true" />
               </IconButton>
@@ -193,7 +193,7 @@ export default function AudioPlayer() {
               <IconButton
                 label={t('audio.next')}
                 onClick={next}
-                className="grid h-9 w-9 place-items-center rounded-full text-muted transition-colors hover:text-accent"
+                className="grid h-11 w-11 place-items-center rounded-full text-muted transition-colors hover:text-accent"
               >
                 <SkipForward size={18} aria-hidden="true" />
               </IconButton>
@@ -204,7 +204,7 @@ export default function AudioPlayer() {
               <IconButton
                 label={isMuted || volume === 0 ? t('audio.unmute') : t('audio.mute')}
                 onClick={toggleMute}
-                className="grid h-8 w-8 place-items-center rounded-full text-muted transition-colors hover:text-accent"
+                className="grid h-11 w-11 place-items-center rounded-full text-muted transition-colors hover:text-accent"
               >
                 {isMuted || volume === 0 ? (
                   <VolumeX size={16} aria-hidden="true" />
@@ -236,7 +236,7 @@ export default function AudioPlayer() {
                       onClick={() => selectTrack(i)}
                       aria-current={isCurrent ? 'true' : undefined}
                       className={cn(
-                        'flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors',
+                        'flex min-h-11 w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors',
                         isCurrent
                           ? 'bg-glass text-accent'
                           : 'text-muted hover:bg-glass hover:text-content',

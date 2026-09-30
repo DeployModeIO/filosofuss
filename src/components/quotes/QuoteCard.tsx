@@ -5,7 +5,7 @@ import type { LucideIcon } from 'lucide-react'
 import { Calendar, Check, Clock, Copy, Heart, Landmark, Linkedin, Maximize2, Quote as QuoteIcon, Share2, Volume2, Square } from 'lucide-react'
 import type { Philosopher, Quote } from '@/types'
 import { getPhilosopherById, getQuoteSource, getQuoteText } from '@/data/quotes'
-import { buildQuoteShareUrl, cn, formatYear } from '@/lib/utils'
+import { buildQuoteShareUrl, cn, formatYear, initials } from '@/lib/utils'
 import { useApp } from '@/context/AppContext'
 import { useNarration } from '@/context/NarrationContext'
 
@@ -32,14 +32,6 @@ const ICON_SWAP = {
   initial: { opacity: 0, scale: 0.5 },
   animate: { opacity: 1, scale: 1 },
   exit: { opacity: 0, scale: 0.5 },
-}
-
-function initials(name: string): string {
-  const cleaned = name.replace(/\(.*?\)/g, '').trim()
-  const parts = cleaned.split(/[\s-]+/).filter(Boolean)
-  if (parts.length === 0) return '?'
-  if (parts.length === 1) return parts[0].charAt(0).toUpperCase()
-  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
 }
 
 function MetaChip({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
@@ -71,7 +63,7 @@ function ActionButton({
       aria-pressed={typeof active === 'boolean' ? active : undefined}
       whileTap={prefersReducedMotion ? undefined : { scale: 0.9 }}
       className={cn(
-        'glass grid h-9 w-9 place-items-center rounded-full transition-colors duration-200 hover:text-accent',
+        'glass grid h-11 w-11 place-items-center rounded-full transition-colors duration-200 hover:text-accent',
         active ? 'text-accent' : 'text-muted',
       )}
     >

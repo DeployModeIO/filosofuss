@@ -1,5 +1,5 @@
 import { philosophers } from "./philosophers";
-import type { Philosopher, Quote } from "@/types";
+import type { Philosopher, Quote, Tag } from "@/types";
 import { hashCode, normalize, pickRandom } from "@/lib/utils";
 import { quotesBatch1 } from "./quotesBatch1";
 import { quotesBatch2 } from "./quotesBatch2";
@@ -1718,7 +1718,7 @@ export function getQuoteOfTheDay(date: Date = new Date()): Quote {
 }
 
 /** Devuelve valores únicos y ordenados (orden amigable con el español). */
-function uniqueSorted(values: readonly string[]): string[] {
+function uniqueSorted<T extends string>(values: readonly T[]): T[] {
   return Array.from(new Set(values)).sort((a, b) =>
     a.localeCompare(b, "es", { sensitivity: "base" }),
   );
@@ -1733,7 +1733,7 @@ export const allSchools: string[] = uniqueSorted(
 );
 
 /** Temas del vocabulario controlado realmente usados, ordenados. */
-export const allTags: string[] = uniqueSorted(quotes.flatMap((q) => q.tags));
+export const allTags: Tag[] = uniqueSorted(quotes.flatMap((q) => q.tags));
 
 /**
  * Búsqueda libre: insensible a mayúsculas y a acentos. Busca en el texto de
