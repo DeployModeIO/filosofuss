@@ -47,7 +47,7 @@ function DesktopLink({ item, favoritesCount }: { item: NavItem; favoritesCount: 
           {isFav && favoritesCount > 0 && (
             <span
               aria-label={t('nav.favoritesCount', { n: favoritesCount })}
-              className="grid h-4 min-w-[1rem] place-items-center rounded-full bg-accent px-1 text-[10px] font-bold leading-none text-bg"
+              className="grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-2xs font-bold leading-none text-bg"
             >
               {favoritesCount}
             </span>
@@ -98,7 +98,7 @@ function MobileLink({
             />
           )}
           {isFav && favoritesCount > 0 && (
-            <span className="ml-auto grid h-5 min-w-[1.25rem] place-items-center rounded-full bg-accent px-1.5 text-[11px] font-bold leading-none text-bg">
+            <span className="ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1.5 text-2xs font-bold leading-none text-bg">
               {favoritesCount}
             </span>
           )}

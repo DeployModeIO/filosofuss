@@ -49,7 +49,7 @@ export default function QuoteOfDay() {
           aria-hidden="true"
           className="h-px w-8 bg-gradient-to-r from-transparent to-accent"
         />
-        <span className="font-sans text-xs font-semibold uppercase tracking-[0.3em] text-accent">
+        <span className="font-sans text-xs font-semibold uppercase tracking-eyebrow text-accent">
           {t('qod.label')}
         </span>
         <span

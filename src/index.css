@@ -83,6 +83,14 @@
   --font-display: 'Cormorant Garamond', serif;
   --font-serif: 'Cormorant Garamond', serif;
   --font-sans: 'Inter', system-ui, sans-serif;
+
+  /* Type scale — interlínea, medida y tracking (§2.3) */
+  --leading-ui: 1.2;
+  --leading-body: 1.6;
+  --leading-quote: 1.35;
+  --measure-quote: 34ch;
+  --tracking-logo: 0.18em;
+  --tracking-eyebrow: 0.14em;
 }
 
 html.light {
@@ -332,6 +340,9 @@ body {
 
 /* ============================================================
    KEYFRAMES
+   Única fuente: las animaciones usadas vía `animate-*` viven en
+   tailwind.config.js. Aquí queda solo `gradient-x`, referenciada
+   directamente por `.text-gradient-animated`.
    ============================================================ */
 @keyframes gradient-x {
   0%,
@@ -340,106 +351,6 @@ body {
   }
   50% {
     background-position: 100% 50%;
-  }
-}
-
-@keyframes gradient-y {
-  0%,
-  100% {
-    background-position: 50% 0%;
-  }
-  50% {
-    background-position: 50% 100%;
-  }
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-22px) rotate(2deg);
-  }
-}
-
-@keyframes float-slow {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-14px);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-@keyframes fade-up {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fade-in {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-@keyframes pulse-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 20px -10px var(--glow);
-  }
-  50% {
-    box-shadow: 0 0 45px -6px var(--glow);
-  }
-}
-
-@keyframes drift {
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-  50% {
-    transform: translate(20px, -30px);
-  }
-}
-
-@keyframes aurora {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-    filter: hue-rotate(0deg);
-  }
-  50% {
-    transform: translate(30px, -20px) scale(1.08);
-    filter: hue-rotate(20deg);
-  }
-}
-
-@keyframes spin-slow {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
   }
 }
 

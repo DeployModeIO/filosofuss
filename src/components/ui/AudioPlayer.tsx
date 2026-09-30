@@ -163,7 +163,7 @@ export default function AudioPlayer() {
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <div className="mt-1 flex justify-between text-[10px] tabular-nums text-muted">
+              <div className="mt-1 flex justify-between text-2xs tabular-nums text-muted">
                 <span>{formatTime(currentTime)}</span>
                 <span>{formatTime(duration)}</span>
               </div>
@@ -245,7 +245,7 @@ export default function AudioPlayer() {
                         {isCurrent && isPlaying ? (
                           <Equalizer />
                         ) : (
-                          <span className="text-[10px] tabular-nums">
+                          <span className="text-2xs tabular-nums">
                             {i + 1}
                           </span>
                         )}

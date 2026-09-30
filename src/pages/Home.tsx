@@ -36,7 +36,7 @@ export default function Home() {
           transition={{ duration: 0.5 }}
           className="mx-auto max-w-2xl text-center"
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+          <p className="text-xs font-semibold uppercase tracking-eyebrow text-accent">
             {t('home.featured.label')}
           </p>
           <h2 className="mt-3 font-display text-4xl text-content sm:text-5xl">
