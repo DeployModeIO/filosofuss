@@ -108,3 +108,5 @@ BASE_URL=http://localhost:4280 node scripts/lighthouse.mjs   # ≥90 ×4 (npx li
 - Convención de commits: `feat:`, `fix:`, `chore(...)`, en español/inglés mezclado (estilo existente).
 - Todo texto visible pasa por `t()`; paridad ES/EN 507/507 obligatoria.
 - Tokens de color en `:root` + overrides `html.light`/`html.paper`; sin un cuarto tema.
+
+- **2026-10-01 — El usuario ACEPTÓ las desviaciones de dependencias:** `terser` + `build.minify: 'terser'`, eliminación de `manualChunks` y uso de `playwright-core`; se mantuvo `vitest@3.2.7` para cerrar el advisory crítico.
