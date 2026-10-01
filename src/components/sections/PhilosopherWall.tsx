@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { m, AnimatePresence } from 'framer-motion'
+import { useMemo, useState } from 'react'
+import { m } from 'framer-motion'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { BookOpen, Calendar, MapPin, X } from 'lucide-react'
 import { philosophers } from '@/data/philosophers'
@@ -9,6 +9,7 @@ import { cn, formatYear, hashCode } from '@/lib/utils'
 import { revealContainer, revealItem } from '@/lib/variants'
 import { useApp } from '@/context/AppContext'
 import QuoteCard from '@/components/quotes/QuoteCard'
+import Dialog from '@/components/ui/Dialog'
 
 const GRADIENTS = [
   'from-accent to-accent-2',
@@ -39,20 +40,6 @@ export default function PhilosopherWall() {
   const reduceMotion = usePrefersReducedMotion()
   const { t } = useApp()
   const [selected, setSelected] = useState<Philosopher | null>(null)
-
-  useEffect(() => {
-    if (!selected) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSelected(null)
-    }
-    window.addEventListener('keydown', onKey)
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      window.removeEventListener('keydown', onKey)
-      document.body.style.overflow = prev
-    }
-  }, [selected])
 
   // Mapa id → citas precomputado una sola vez (Task B6), en lugar de filtrar
   // el corpus por cada filósofo en cada render.
@@ -129,96 +116,78 @@ export default function PhilosopherWall() {
         </m.div>
       </m.div>
 
-      <AnimatePresence>
+      <Dialog
+        open={selected !== null}
+        onClose={() => setSelected(null)}
+        labelledBy="philosopher-sheet-title"
+        variant="modal"
+      >
         {selected && (
-          <m.div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: reduceMotion ? 0 : 0.2 }}
-          >
-            <div
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          <div className="relative p-6 sm:p-8">
+            <button
+              type="button"
               onClick={() => setSelected(null)}
-              aria-hidden="true"
-            />
-            <m.div
-              role="dialog"
-              aria-modal="true"
-              aria-label={t('wall.sheetOf', { name: selected.fullName })}
-              className="glass-strong relative z-10 max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-3xl p-6 shadow-card sm:p-8"
-              initial={
-                reduceMotion ? false : { opacity: 0, y: 24, scale: 0.97 }
-              }
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={
-                reduceMotion ? undefined : { opacity: 0, y: 24, scale: 0.97 }
-              }
-              transition={{ duration: reduceMotion ? 0 : 0.25, ease: 'easeOut' }}
+              aria-label={t('wall.close')}
+              className="glass absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-muted transition-colors hover:text-content"
             >
-              <button
-                type="button"
-                onClick={() => setSelected(null)}
-                aria-label={t('wall.close')}
-                className="glass absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-muted transition-colors hover:text-content"
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-start sm:text-left">
+              <span
+                className={cn(
+                  'flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-2xl font-semibold text-[#0a0a12] shadow-glow',
+                  gradientFor(selected.id),
+                )}
               >
-                <X className="h-4 w-4" />
-              </button>
-
-              <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-start sm:text-left">
-                <span
-                  className={cn(
-                    'flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-2xl font-semibold text-[#0a0a12] shadow-glow',
-                    gradientFor(selected.id),
-                  )}
+                {initials(selected.name)}
+              </span>
+              <div className="flex flex-col gap-2">
+                <h3
+                  id="philosopher-sheet-title"
+                  className="font-display text-2xl text-content sm:text-3xl"
                 >
-                  {initials(selected.name)}
-                </span>
-                <div className="flex flex-col gap-2">
-                  <h3 className="font-display text-2xl text-content sm:text-3xl">
-                    {selected.fullName}
-                  </h3>
-                  <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm text-muted sm:justify-start">
-                    <span className="inline-flex items-center gap-1.5">
-                      <Calendar className="h-4 w-4 text-accent" />
-                      {formatYear(selected.birthYear)} –{' '}
-                      {formatYear(selected.deathYear)}
-                    </span>
-                    <span className="inline-flex items-center gap-1.5">
-                      <MapPin className="h-4 w-4 text-accent" />
-                      {selected.nationality}
-                    </span>
-                  </div>
-                  <p className="text-sm text-accent">
-                    {selected.era} · {selected.school}
-                  </p>
+                  {selected.fullName}
+                </h3>
+                <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm text-muted sm:justify-start">
+                  <span className="inline-flex items-center gap-1.5">
+                    <Calendar className="h-4 w-4 text-accent" />
+                    {formatYear(selected.birthYear)} –{' '}
+                    {formatYear(selected.deathYear)}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <MapPin className="h-4 w-4 text-accent" />
+                    {selected.nationality}
+                  </span>
                 </div>
+                <p className="text-sm text-accent">
+                  {selected.era} · {selected.school}
+                </p>
               </div>
+            </div>
 
-              <p className="mt-6 leading-relaxed text-muted">{selected.bio}</p>
+            <p className="mt-6 leading-relaxed text-muted">{selected.bio}</p>
 
-              <div className="mt-8 flex flex-col gap-3">
-                <h4 className="inline-flex items-center gap-2 font-display text-lg text-content">
-                  <BookOpen className="h-5 w-5 text-accent" />
-                  {t('wall.quotesCount', { n: selectedQuotes.length })}
-                </h4>
-                <div className="flex flex-col gap-3">
-                  {selectedQuotes.map((q, i) => (
-                    <QuoteCard
-                      key={q.id}
-                      quote={q}
-                      philosopher={selected}
-                      variant="compact"
-                      index={i}
-                    />
-                  ))}
-                </div>
+            <div className="mt-8 flex flex-col gap-3">
+              <h4 className="inline-flex items-center gap-2 font-display text-lg text-content">
+                <BookOpen className="h-5 w-5 text-accent" />
+                {t('wall.quotesCount', { n: selectedQuotes.length })}
+              </h4>
+              <div className="flex flex-col gap-3">
+                {selectedQuotes.map((q, i) => (
+                  <QuoteCard
+                    key={q.id}
+                    quote={q}
+                    philosopher={selected}
+                    variant="compact"
+                    index={i}
+                  />
+                ))}
               </div>
-            </m.div>
-          </m.div>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
+      </Dialog>
     </section>
   )
 }

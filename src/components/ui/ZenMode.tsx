@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { AnimatePresence, m } from 'framer-motion'
+import type { ReactNode } from 'react'
+import { m, useScroll, useTransform } from 'framer-motion'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import {
   ChevronLeft,
@@ -22,8 +23,39 @@ import {
 } from '@/data/quotes'
 import { useLocalStorage } from '@/lib/storage'
 import { cn } from '@/lib/utils'
+import Dialog from '@/components/ui/Dialog'
 
 const MAX_SIZE = 5
+
+/**
+ * Scrollable quote area with a subtle parallax shift (±12 px total, §3.3).
+ * It is mounted only while a quote is open, so `useScroll` always finds its
+ * container. Reduced motion leaves `y` untouched.
+ */
+function ParallaxQuote({
+  reduceMotion,
+  children,
+}: {
+  reduceMotion: boolean
+  children: ReactNode
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({ container: scrollRef })
+  const parallaxY = useTransform(scrollYProgress, [0, 1], [6, -6])
+  return (
+    <div
+      ref={scrollRef}
+      className="flex flex-1 items-center justify-center overflow-y-auto px-6 py-8"
+    >
+      <m.div
+        style={reduceMotion ? undefined : { y: parallaxY }}
+        className="mx-auto flex max-w-3xl flex-col items-center text-center [will-change:transform]"
+      >
+        {children}
+      </m.div>
+    </div>
+  )
+}
 
 export default function ZenMode() {
   const reduceMotion = usePrefersReducedMotion()
@@ -50,40 +82,33 @@ export default function ZenMode() {
   useEffect(() => {
     if (!quote) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeZen()
-      else if (e.key === 'ArrowRight') next()
+      if (e.key === 'ArrowRight') next()
       else if (e.key === 'ArrowLeft') prev()
     }
     window.addEventListener('keydown', onKey)
-    const prevOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      window.removeEventListener('keydown', onKey)
-      document.body.style.overflow = prevOverflow
-    }
+    return () => window.removeEventListener('keydown', onKey)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quote, closeZen, openZen])
+  }, [quote, openZen])
 
   const narratingThis = isNarrating && activeQuoteId === quote?.id
   const fontSize = `${1.25 + size * 0.3}rem`
 
   return (
-    <AnimatePresence>
+    <Dialog
+      open={quote !== undefined}
+      onClose={closeZen}
+      variant="fullscreen"
+      labelledBy="zen-title"
+      className="text-content"
+    >
       {quote && (
-        <m.div
-          key="zen"
-          role="dialog"
-          aria-modal="true"
-          aria-label={t('zen.label')}
-          initial={reduceMotion ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={reduceMotion ? undefined : { opacity: 0 }}
-          transition={{ duration: 0.25 }}
-          className="fixed inset-0 z-[60] flex flex-col bg-[var(--bg)]"
-        >
+        <>
           {/* Barra superior */}
           <div className="flex items-center justify-between px-5 py-4 sm:px-8">
-            <span className="font-sans text-xs font-semibold uppercase tracking-[0.3em] text-accent">
+            <span
+              id="zen-title"
+              className="font-sans text-xs font-semibold uppercase tracking-[0.3em] text-accent"
+            >
               {t('zen.label')}
             </span>
             <button
@@ -96,36 +121,35 @@ export default function ZenMode() {
               <X size={18} aria-hidden="true" />
             </button>
           </div>
-          {/* Cita centrada */}
-          <div className="flex flex-1 items-center justify-center overflow-y-auto px-6 py-8">
-            <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
-              <blockquote
-                className={cn(
-                  'leading-relaxed text-content',
-                  serif ? 'font-serif italic' : 'font-sans',
-                )}
-                style={{ fontSize }}
-              >
-                {getQuoteText(quote, locale)}
-              </blockquote>
 
-              <div className="mt-8 flex flex-col items-center gap-1.5">
-                {phil && (
-                  <>
-                    <span className="font-display text-xl text-accent">{phil.name}</span>
-                    <span className="text-sm text-muted">
-                      {phil.era} · {phil.school}
-                    </span>
-                  </>
-                )}
-                {quote.source && (
-                  <span className="text-xs italic text-muted">
-                    — {getQuoteSource(quote, locale)}
+          {/* Cita centrada + parallax */}
+          <ParallaxQuote reduceMotion={reduceMotion}>
+            <blockquote
+              className={cn(
+                'leading-relaxed text-content',
+                serif ? 'font-serif italic' : 'font-sans',
+              )}
+              style={{ fontSize }}
+            >
+              {getQuoteText(quote, locale)}
+            </blockquote>
+
+            <div className="mt-8 flex flex-col items-center gap-1.5">
+              {phil && (
+                <>
+                  <span className="font-display text-xl text-accent">{phil.name}</span>
+                  <span className="text-sm text-muted">
+                    {phil.era} · {phil.school}
                   </span>
-                )}
-              </div>
+                </>
+              )}
+              {quote.source && (
+                <span className="text-xs italic text-muted">
+                  — {getQuoteSource(quote, locale)}
+                </span>
+              )}
             </div>
-          </div>
+          </ParallaxQuote>
 
           {/* Barra inferior de controles */}
           <div className="flex flex-wrap items-center justify-center gap-2 px-5 py-5 sm:gap-3 sm:px-8">
@@ -204,8 +228,8 @@ export default function ZenMode() {
               <Type size={18} aria-hidden="true" />
             </button>
           </div>
-        </m.div>
+        </>
       )}
-    </AnimatePresence>
+    </Dialog>
   )
 }

@@ -352,11 +352,9 @@ function CardBody({
  */
 function RichCardFrame({
   variant,
-  index,
   children,
 }: {
   variant: QuoteCardVariant
-  index: number
   children: ReactNode
 }) {
   const prefersReducedMotion = usePrefersReducedMotion()
@@ -392,14 +390,7 @@ function RichCardFrame({
   }
 
   return (
-    <m.div
-      initial={prefersReducedMotion ? undefined : { opacity: 0, y: 24 }}
-      whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-40px' }}
-      transition={{ delay: Math.min(index * 0.05, 0.4), duration: 0.5, ease: 'easeOut' }}
-      style={{ perspective: 1000 }}
-      className="h-full"
-    >
+    <div style={{ perspective: 1000 }} className="h-full">
       <m.div
         onMouseMove={handlePointerMove}
         onMouseLeave={resetTilt}
@@ -421,7 +412,7 @@ function RichCardFrame({
         />
         {children}
       </m.div>
-    </m.div>
+    </div>
   )
 }
 
@@ -452,7 +443,6 @@ function QuoteCard({
   quote,
   philosopher,
   variant = 'default',
-  index = 0,
   showActions = true,
 }: QuoteCardProps) {
   const prefersReducedMotion = usePrefersReducedMotion()
@@ -546,7 +536,7 @@ function QuoteCard({
 
   if (isRich) {
     return (
-      <RichCardFrame variant={variant} index={index}>
+      <RichCardFrame variant={variant}>
         {body}
       </RichCardFrame>
     )

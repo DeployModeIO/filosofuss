@@ -41,6 +41,7 @@ const es: Dict = {
   'audio.unmute': 'Activar sonido',
   'audio.volume': 'Volumen',
   'audio.aria': 'Reproductor de música ambiente',
+  'audio.error': 'No se pudo reproducir esta pista.',
 
   // Hero
   'hero.tagline': 'Sabiduría eterna',
@@ -185,6 +186,7 @@ const en: Dict = {
   'audio.unmute': 'Unmute',
   'audio.volume': 'Volume',
   'audio.aria': 'Ambient music player',
+  'audio.error': 'This track could not be played.',
 
   // Hero
   'hero.tagline': 'Eternal wisdom',

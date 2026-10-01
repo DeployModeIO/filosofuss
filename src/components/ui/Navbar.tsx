@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { AnimatePresence, m } from 'framer-motion'
 import { Heart, Menu, X } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useApp } from '@/context/AppContext'
+import { useFocusTrap } from './Dialog'
 import Logo from './Logo'
 import ThemeToggle from './ThemeToggle'
 import LanguageToggle from './LanguageToggle'
@@ -112,6 +113,14 @@ export default function Navbar() {
   const { favoritesCount, t } = useApp()
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const menuId = useId()
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  useFocusTrap({
+    containerRef: panelRef,
+    active: open,
+    onEscape: () => setOpen(false),
+  })
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
@@ -144,6 +153,7 @@ export default function Navbar() {
             onClick={() => setOpen((v) => !v)}
             aria-label={open ? t('nav.closeMenu') : t('nav.openMenu')}
             aria-expanded={open}
+            aria-controls={menuId}
             className="glass-strong grid h-11 w-11 place-items-center rounded-full text-content transition-colors hover:text-accent md:hidden"
           >
             <AnimatePresence mode="wait" initial={false}>
@@ -169,13 +179,15 @@ export default function Navbar() {
       <AnimatePresence>
         {open && (
           <m.div
+            ref={panelRef}
+            id={menuId}
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.25, ease: 'easeInOut' }}
             className="overflow-hidden border-t border-line-soft md:hidden"
           >
-            <div className="glass-strong flex flex-col gap-1 px-3 py-3">
+            <nav className="glass-strong flex flex-col gap-1 px-3 py-3">
               {NAV_ITEMS.map((item) => (
                 <MobileLink
                   key={item.to}
@@ -184,7 +196,7 @@ export default function Navbar() {
                   onNavigate={() => setOpen(false)}
                 />
               ))}
-            </div>
+            </nav>
           </m.div>
         )}
       </AnimatePresence>

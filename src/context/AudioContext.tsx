@@ -20,6 +20,10 @@ export interface AudioContextValue {
   volume: number
   isMuted: boolean
   duration: number
+  /** `true` after the current track failed to load. Cleared on the next play. */
+  error: boolean
+  /** The single `<audio>` element, exposed for the audio-reactive visualizer. */
+  audioEl: HTMLAudioElement | null
   play: () => void
   pause: () => void
   togglePlay: () => void
@@ -86,11 +90,11 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   )
   const [isMuted, setIsMuted] = useState(false)
   const [duration, setDuration] = useState(0)
+  const [error, setError] = useState(false)
 
   // Refs para evitar closures obsoletas dentro de los manejadores del elemento.
   const trackIndexRef = useRef(0)
   const loadedSrcRef = useRef('')
-  const errorCountRef = useRef(0)
 
   // Avanza/envuelve el índice de forma síncrona (ref + state).
   const goToIndex = useCallback((index: number) => {
@@ -106,6 +110,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     if (!audio) return
     const track = tracks[trackIndexRef.current]
     if (!track) return
+    setError(false)
     if (loadedSrcRef.current !== track.src) {
       audio.src = track.src
       loadedSrcRef.current = track.src
@@ -184,7 +189,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
 
     const onPlay = () => {
       setIsPlaying(true)
-      errorCountRef.current = 0
+      setError(false)
     }
     const onPause = () => setIsPlaying(false)
     const onTimeUpdate = () => setProgress(audio.currentTime || 0)
@@ -199,14 +204,13 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     }
 
     const onError = () => {
-      errorCountRef.current += 1
-      // Si TODAS fallan, paramos para evitar un bucle infinito.
-      if (errorCountRef.current >= tracks.length) {
-        setIsPlaying(false)
-        return
-      }
-      goToIndex(trackIndexRef.current + 1)
-      play()
+      // Un fallo de pista NO rota en silencio: se detiene la reproducción, se
+      // avisa en la UI y el visualizador cae al fallback (Review Focus #4).
+      setIsPlaying(false)
+      setError(true)
+      audio.pause()
+      // Permitir reintentar la misma pista en el próximo play.
+      loadedSrcRef.current = ''
     }
 
     audio.addEventListener('play', onPlay)
@@ -231,6 +235,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   }, [goToIndex, play])
 
   const currentTrack = tracks[trackIndex]
+  const audioEl = audioRef.current
 
   const value = useMemo<AudioContextValue>(
     () => ({
@@ -240,6 +245,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       volume,
       isMuted,
       duration,
+      error,
+      audioEl,
       play,
       pause,
       togglePlay,
@@ -256,6 +263,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       volume,
       isMuted,
       duration,
+      error,
+      audioEl,
       play,
       pause,
       togglePlay,
