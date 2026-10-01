@@ -136,7 +136,7 @@ export default function Navbar() {
         scrolled ? 'glass-strong shadow-card' : 'glass',
       )}
     >
-      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-6">
         <Logo size="md" />
 
         <div className="hidden items-center gap-8 md:flex">
@@ -145,9 +145,12 @@ export default function Navbar() {
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <LanguageToggle />
-          <ThemeToggle />
+          {/* El selector de tema ocupa demasiado en móvil; se mueve al menú. */}
+          <div className="hidden md:flex">
+            <ThemeToggle />
+          </div>
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
@@ -196,6 +199,14 @@ export default function Navbar() {
                   onNavigate={() => setOpen(false)}
                 />
               ))}
+
+              {/* Selector de tema (sólo móvil; en escritorio vive en la barra). */}
+              <div className="mt-1 flex items-center justify-between gap-3 border-t border-line-soft px-2 pt-3">
+                <span className="text-xs font-semibold uppercase tracking-eyebrow text-muted">
+                  {t('theme.label')}
+                </span>
+                <ThemeToggle layoutKey="theme-pill-mobile" />
+              </div>
             </nav>
           </m.div>
         )}

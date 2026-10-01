@@ -20,6 +20,7 @@ import { useAudio, useAudioProgress } from '@/context/AudioContext'
 import { useApp } from '@/context/AppContext'
 import { tracks } from '@/data/tracks'
 import { cn } from '@/lib/utils'
+import { useFocusTrap } from '@/components/ui/Dialog'
 
 function formatTime(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds <= 0) return '0:00'
@@ -83,7 +84,16 @@ export default function AudioPlayer() {
   } = useAudio()
   const { t } = useApp()
   const [expanded, setExpanded] = useState(false)
+  const panelRef = useRef<HTMLDivElement>(null)
   const panelId = useId()
+
+  // El panel expandido atrapa el foco, se cierra con Escape y devuelve el foco
+  // al botón que lo abrió (Task E1 / M9: diálogo real, no un `region` suelto).
+  useFocusTrap({
+    containerRef: panelRef,
+    active: expanded,
+    onEscape: () => setExpanded(false),
+  })
   // Suscripción aislada: sólo este componente re-renderiza a ~4 Hz (Task B7).
   const currentTime = useAudioProgress()
 
@@ -169,10 +179,13 @@ export default function AudioPlayer() {
       <AnimatePresence initial={false}>
         {expanded && (
           <m.div
+            ref={panelRef}
             key="audio-panel"
             id={panelId}
-            role="region"
+            role="dialog"
+            aria-modal="true"
             aria-label={t('audio.aria')}
+            tabIndex={-1}
             className="glass-strong overflow-hidden rounded-2xl p-4 shadow-card sm:w-80"
             initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8, height: 0 }}
             animate={

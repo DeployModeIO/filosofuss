@@ -17,7 +17,12 @@ const OPTIONS: ThemeOption[] = [
   { value: 'paper', icon: FileText, key: 'theme.paper' },
 ]
 
-export default function ThemeToggle() {
+export interface ThemeToggleProps {
+  /** `layoutId` único para que dos instancias no compartan la píldora deslizante. */
+  layoutKey?: string
+}
+
+export default function ThemeToggle({ layoutKey = 'theme-pill' }: ThemeToggleProps) {
   const { theme, setTheme, t } = useApp()
   const reduceMotion = usePrefersReducedMotion()
 
@@ -46,7 +51,7 @@ export default function ThemeToggle() {
                 <span className="absolute inset-0 rounded-full bg-gradient-to-br from-accent to-accent-2 shadow-glow" />
               ) : (
                 <m.span
-                  layoutId="theme-pill"
+                  layoutId={layoutKey}
                   className="absolute inset-0 rounded-full bg-gradient-to-br from-accent to-accent-2 shadow-glow"
                   transition={{ type: 'spring', stiffness: 420, damping: 32 }}
                 />
