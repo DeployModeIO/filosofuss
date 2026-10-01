@@ -6,6 +6,7 @@ import { Search, X } from 'lucide-react'
 import { quotes, searchQuotes, getPhilosopherById } from '@/data/quotes'
 import type { Quote, Tag } from '@/types'
 import { shuffle } from '@/lib/utils'
+import { revealContainer, revealItem } from '@/lib/variants'
 import SearchBar from '@/components/controls/SearchBar'
 import FilterPanel from '@/components/controls/FilterPanel'
 import QuoteCard from '@/components/quotes/QuoteCard'
@@ -130,69 +131,80 @@ export default function BrowseQuotes() {
 
   return (
     <section className="relative mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <m.header
-        initial={reduceMotion ? false : { opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mx-auto max-w-2xl text-center"
+      <m.div
+        variants={reduceMotion ? undefined : revealContainer}
+        initial={reduceMotion ? false : 'hidden'}
+        whileInView={reduceMotion ? undefined : 'show'}
+        viewport={{ once: true, amount: 0.25 }}
       >
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-          {t('browse.label')}
-        </p>
-        <h1 className="mt-3 font-display text-4xl text-content sm:text-5xl">
-          {t('browse.titleA')}
-          <span className="text-gradient-animated">{t('browse.titleB')}</span>
-        </h1>
-        <p className="mt-4 text-muted">
-          {t('browse.subtitle')}
-        </p>
-      </m.header>
+        <m.header
+          variants={reduceMotion ? undefined : revealItem}
+          className="mx-auto max-w-2xl text-center"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+            {t('browse.label')}
+          </p>
+          <h1 className="mt-3 font-display text-4xl text-content sm:text-5xl">
+            {t('browse.titleA')}
+            <span className="text-gradient-animated">{t('browse.titleB')}</span>
+          </h1>
+          <p className="mt-4 text-muted">
+            {t('browse.subtitle')}
+          </p>
+        </m.header>
 
-      <div className="mx-auto mt-10 flex max-w-3xl flex-col gap-5">
-        <SearchBar query={query} onQuery={setQuery} />
-        <FilterPanel
-          selectedEra={selectedEra}
-          selectedSchool={selectedSchool}
-          selectedTag={selectedTag}
-          onEra={setSelectedEra}
-          onSchool={setSelectedSchool}
-          onTag={setSelectedTag}
-          onClear={() => {
-            setSelectedEra(null)
-            setSelectedSchool(null)
-            setSelectedTag(null)
-          }}
-        />
-      </div>
+        <m.div
+          variants={reduceMotion ? undefined : revealItem}
+          className="mx-auto mt-10 flex max-w-3xl flex-col gap-5"
+        >
+          <SearchBar query={query} onQuery={setQuery} />
+          <FilterPanel
+            selectedEra={selectedEra}
+            selectedSchool={selectedSchool}
+            selectedTag={selectedTag}
+            onEra={setSelectedEra}
+            onSchool={setSelectedSchool}
+            onTag={setSelectedTag}
+            onClear={() => {
+              setSelectedEra(null)
+              setSelectedSchool(null)
+              setSelectedTag(null)
+            }}
+          />
+        </m.div>
 
-      <div className="mx-auto mt-8 flex max-w-6xl flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-muted">
-          {t('browse.showing')}
-          <span className="font-semibold text-content">{results.length}</span>{' '}
-          {results.length === 1 ? t('browse.quote') : t('browse.quotes')}
-        </p>
+        <m.div
+          variants={reduceMotion ? undefined : revealItem}
+          className="mx-auto mt-8 flex max-w-6xl flex-wrap items-center justify-between gap-3"
+        >
+          <p className="text-sm text-muted">
+            {t('browse.showing')}
+            <span className="font-semibold text-content">{results.length}</span>{' '}
+            {results.length === 1 ? t('browse.quote') : t('browse.quotes')}
+          </p>
 
-        {chips.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2">
-            {chips.map((c) => (
-              <span
-                key={c.label}
-                className="inline-flex items-center gap-1.5 rounded-full border border-line bg-glass px-3 py-1 text-xs text-content"
-              >
-                {c.label}
-                <button
-                  type="button"
-                  onClick={c.clear}
-                  aria-label={t('browse.removeFilter', { label: c.label })}
-                  className="text-muted transition-colors hover:text-content"
+          {chips.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              {chips.map((c) => (
+                <span
+                  key={c.label}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-line bg-glass px-3 py-1 text-xs text-content"
                 >
-                  <X className="h-3 w-3" />
-                </button>
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
+                  {c.label}
+                  <button
+                    type="button"
+                    onClick={c.clear}
+                    aria-label={t('browse.removeFilter', { label: c.label })}
+                    className="text-muted transition-colors hover:text-content"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </m.div>
+      </m.div>
 
       {results.length === 0 ? (
         <div className="mx-auto mt-12 flex max-w-md flex-col items-center gap-4 rounded-3xl border border-line-soft bg-glass px-6 py-12 text-center">

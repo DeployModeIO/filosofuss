@@ -16,7 +16,8 @@ interface Particle {
 const COLORS = ['rgba(201,169,106,', 'rgba(176,113,63,', 'rgba(122,46,77,']
 
 function createParticles(width: number, height: number): Particle[] {
-  const count = Math.min(70, Math.max(22, Math.floor(width / 24)))
+  // Cap duro de 40 partículas (Task C5 / P-14), antes hasta 70.
+  const count = Math.min(40, Math.max(16, Math.floor(width / 32)))
   const particles: Particle[] = []
   for (let i = 0; i < count; i++) {
     particles.push({

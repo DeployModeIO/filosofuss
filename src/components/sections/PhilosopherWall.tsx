@@ -6,6 +6,7 @@ import { philosophers } from '@/data/philosophers'
 import { getQuotesByPhilosopher } from '@/data/quotes'
 import type { Philosopher, Quote } from '@/types'
 import { cn, formatYear, hashCode } from '@/lib/utils'
+import { revealContainer, revealItem } from '@/lib/variants'
 import { useApp } from '@/context/AppContext'
 import QuoteCard from '@/components/quotes/QuoteCard'
 
@@ -67,60 +68,66 @@ export default function PhilosopherWall() {
 
   return (
     <section className="relative mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <m.header
-        initial={reduceMotion ? false : { opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mx-auto max-w-2xl text-center"
+      <m.div
+        variants={reduceMotion ? undefined : revealContainer}
+        initial={reduceMotion ? false : 'hidden'}
+        whileInView={reduceMotion ? undefined : 'show'}
+        viewport={{ once: true, amount: 0.25 }}
       >
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-          {t('wall.label')}
-        </p>
-        <h1 className="mt-3 font-display text-4xl text-content sm:text-5xl">
-          {t('wall.titleA')}
-          <span className="text-gradient-animated">{t('wall.titleB')}</span>
-        </h1>
-        <p className="mt-4 text-muted">
-          {t('wall.subtitle', { n: philosophers.length })}
-        </p>
-      </m.header>
+        <m.header
+          variants={reduceMotion ? undefined : revealItem}
+          className="mx-auto max-w-2xl text-center"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+            {t('wall.label')}
+          </p>
+          <h1 className="mt-3 font-display text-4xl text-content sm:text-5xl">
+            {t('wall.titleA')}
+            <span className="text-gradient-animated">{t('wall.titleB')}</span>
+          </h1>
+          <p className="mt-4 text-muted">
+            {t('wall.subtitle', { n: philosophers.length })}
+          </p>
+        </m.header>
 
-      <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
-        {philosophers.map((p, i) => {
-          const count = quotesByPhilosopher.get(p.id)?.length ?? 0
-          return (
-            <m.button
-              key={p.id}
-              type="button"
-              onClick={() => setSelected(p)}
-              initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, delay: Math.min(i * 0.03, 0.4) }}
-              className="glass card-hover group flex flex-col items-center gap-3 rounded-2xl p-5 text-center sm:p-6"
-            >
-              <span
-                className={cn(
-                  'flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br text-xl font-semibold text-[#0a0a12] shadow-glow transition-transform duration-300 group-hover:scale-105',
-                  gradientFor(p.id),
-                )}
+        {/* El muro entra como un único nodo: sin fade-up por tarjeta (§3.2). */}
+        <m.div
+          variants={reduceMotion ? undefined : revealItem}
+          className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4"
+        >
+          {philosophers.map((p) => {
+            const count = quotesByPhilosopher.get(p.id)?.length ?? 0
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setSelected(p)}
+                className="glass card-hover group flex flex-col items-center gap-3 rounded-2xl p-5 text-center sm:p-6"
               >
-                {initials(p.name)}
-              </span>
-              <span className="flex flex-col gap-1">
-                <span className="font-display text-base text-content sm:text-lg">
-                  {p.name}
+                <span
+                  className={cn(
+                    'flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br text-xl font-semibold text-[#0a0a12] shadow-glow transition-transform duration-300 group-hover:scale-105',
+                    gradientFor(p.id),
+                  )}
+                >
+                  {initials(p.name)}
                 </span>
-                <span className="text-xs text-muted">
-                  {p.era} · {p.school}
+                <span className="flex flex-col gap-1">
+                  <span className="font-display text-base text-content sm:text-lg">
+                    {p.name}
+                  </span>
+                  <span className="text-xs text-muted">
+                    {p.era} · {p.school}
+                  </span>
                 </span>
-              </span>
-               <span className="text-xs font-medium text-accent">
-                {count} {count === 1 ? t('wall.quote') : t('wall.quotes')}
-              </span>
-            </m.button>
-          )
-        })}
-      </div>
+                <span className="text-xs font-medium text-accent">
+                  {count} {count === 1 ? t('wall.quote') : t('wall.quotes')}
+                </span>
+              </button>
+            )
+          })}
+        </m.div>
+      </m.div>
 
       <AnimatePresence>
         {selected && (

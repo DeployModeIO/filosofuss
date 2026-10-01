@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { m } from 'framer-motion'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
@@ -12,48 +13,44 @@ interface AuroraBlob {
   scale: number[]
 }
 
+/**
+ * Dos blobs (antes 4, Task C5 / P-14) con gradientes pre-renderizados. Se
+ * elimina el `filter: blur(50px)` animado sobre superficies grandes: sólo se
+ * animan `transform`, con `will-change: transform` y `contain: paint`.
+ */
 const BLOBS: AuroraBlob[] = [
   {
-    bg: 'radial-gradient(circle at center, rgba(176,113,63,0.50), rgba(176,113,63,0) 62%)',
-    size: 'min(620px, 62vw)',
-    left: '-6%',
+    bg: 'radial-gradient(circle at center, rgba(176,113,63,0.55), rgba(176,113,63,0) 62%)',
+    size: 'min(640px, 64vw)',
+    left: '-8%',
     top: '-10%',
     duration: 26,
-    x: [0, 90, -40, 0],
-    y: [0, 60, 30, 0],
-    scale: [1, 1.15, 0.95, 1],
+    x: [0, 70, -40, 0],
+    y: [0, 50, 30, 0],
+    scale: [1, 1.12, 0.96, 1],
   },
   {
-    bg: 'radial-gradient(circle at center, rgba(201,169,106,0.50), rgba(201,169,106,0) 60%)',
-    size: 'min(560px, 56vw)',
-    left: '60%',
-    top: '2%',
+    bg: 'radial-gradient(circle at center, rgba(201,169,106,0.52), rgba(201,169,106,0) 60%)',
+    size: 'min(620px, 60vw)',
+    left: '50%',
+    top: '26%',
     duration: 30,
     x: [0, -70, 50, 0],
-    y: [0, 50, -30, 0],
-    scale: [1, 0.9, 1.1, 1],
-  },
-  {
-    bg: 'radial-gradient(circle at center, rgba(122,46,77,0.45), rgba(122,46,77,0) 60%)',
-    size: 'min(600px, 60vw)',
-    left: '28%',
-    top: '56%',
-    duration: 28,
-    x: [0, 60, -70, 0],
-    y: [0, -40, 20, 0],
-    scale: [1, 1.2, 0.9, 1],
-  },
-  {
-    bg: 'radial-gradient(circle at center, rgba(176,113,63,0.35), rgba(176,113,63,0) 62%)',
-    size: 'min(500px, 50vw)',
-    left: '6%',
-    top: '58%',
-    duration: 22,
-    x: [0, -50, 60, 0],
-    y: [0, 30, -50, 0],
-    scale: [1, 1.05, 0.95, 1],
+    y: [0, 40, -30, 0],
+    scale: [1, 0.92, 1.1, 1],
   },
 ]
+
+const BLOB_STYLE = (blob: AuroraBlob): CSSProperties => ({
+  width: blob.size,
+  height: blob.size,
+  left: blob.left,
+  top: blob.top,
+  background: blob.bg,
+  opacity: 0.45,
+  willChange: 'transform',
+  contain: 'paint',
+})
 
 export default function AuroraBackground() {
   const prefersReducedMotion = usePrefersReducedMotion()
@@ -64,29 +61,13 @@ export default function AuroraBackground() {
           <div
             key={i}
             className="absolute rounded-full"
-            style={{
-              width: blob.size,
-              height: blob.size,
-              left: blob.left,
-              top: blob.top,
-              background: blob.bg,
-              filter: 'blur(50px)',
-              opacity: 0.42,
-            }}
+            style={BLOB_STYLE(blob)}
           />
         ) : (
           <m.div
             key={i}
             className="absolute rounded-full"
-            style={{
-              width: blob.size,
-              height: blob.size,
-              left: blob.left,
-              top: blob.top,
-              background: blob.bg,
-              filter: 'blur(50px)',
-              opacity: 0.42,
-            }}
+            style={BLOB_STYLE(blob)}
             animate={{ x: blob.x, y: blob.y, scale: blob.scale }}
             transition={{ duration: blob.duration, repeat: Infinity, ease: 'easeInOut' }}
           />
