@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { AnimatePresence, m } from 'framer-motion'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
+import { spring } from '@/lib/variants'
+import { announce } from '@/components/ui/StatusAnnouncer'
 import {
   ListMusic,
   Pause,
@@ -54,22 +56,27 @@ function IconButton({
   onClick,
   className,
   children,
+  hoverScale = false,
 }: {
   label: string
   onClick: () => void
   className: string
   children: ReactNode
+  hoverScale?: boolean
 }) {
+  const reduceMotion = usePrefersReducedMotion()
   return (
-    <button
+    <m.button
       type="button"
       onClick={onClick}
       aria-label={label}
       title={label}
+      whileHover={reduceMotion || !hoverScale ? undefined : { scale: 1.05, transition: spring.press }}
+      whileTap={reduceMotion ? undefined : { scale: 0.94, transition: spring.press }}
       className={className}
     >
       {children}
-    </button>
+    </m.button>
   )
 }
 
@@ -93,6 +100,15 @@ export default function AudioPlayer() {
   const [expanded, setExpanded] = useState(false)
   // Suscripción aislada: sólo este componente re-renderiza a ~4 Hz (Task B7).
   const currentTime = useAudioProgress()
+
+  // Anuncia play/pausa en la región aria-live (Task C8). El ref evita anunciar
+  // en el montaje inicial y al cambiar de idioma (sólo cuando cambia el estado).
+  const prevPlayingRef = useRef(isPlaying)
+  useEffect(() => {
+    if (prevPlayingRef.current === isPlaying) return
+    prevPlayingRef.current = isPlaying
+    announce(isPlaying ? t('status.playing') : t('status.paused'))
+  }, [isPlaying, t])
 
   const progress =
     duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0
@@ -179,9 +195,10 @@ export default function AudioPlayer() {
                 <SkipBack size={18} aria-hidden="true" />
               </IconButton>
                <IconButton
+                hoverScale
                 label={isPlaying ? t('audio.pause') : t('audio.play')}
                 onClick={togglePlay}
-                className="grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-accent to-accent-2 text-[#0a0a12] shadow-glow transition-transform duration-200 hover:scale-105"
+                className="grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-accent to-accent-2 text-[#0a0a12] shadow-glow"
               >
                 {isPlaying ? (
                   <Pause size={20} aria-hidden="true" />

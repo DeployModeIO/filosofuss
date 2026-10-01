@@ -2,6 +2,8 @@ import { memo, useState } from 'react'
 import type { MouseEvent, ReactNode } from 'react'
 import { AnimatePresence, m, useMotionTemplate, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
+import { spring } from '@/lib/variants'
+import { announce } from '@/components/ui/StatusAnnouncer'
 import type { LucideIcon } from 'lucide-react'
 import { Calendar, Check, Clock, Copy, Heart, Landmark, Linkedin, Maximize2, Quote as QuoteIcon, Share2, Volume2, Square } from 'lucide-react'
 import type { Philosopher, Quote } from '@/types'
@@ -85,7 +87,7 @@ function ActionButton({
       aria-label={label}
       title={label}
       aria-pressed={typeof active === 'boolean' ? active : undefined}
-      whileTap={prefersReducedMotion ? undefined : { scale: 0.9 }}
+      whileTap={prefersReducedMotion ? undefined : { scale: 0.9, transition: spring.press }}
       className={className}
     >
       {children}
@@ -477,6 +479,7 @@ function QuoteCard({
   const handleCopy = async () => {
     if (await copyToClipboard()) {
       setCopied(true)
+      announce(t('status.copied'))
       setTimeout(() => setCopied(false), 1600)
     }
   }
@@ -490,6 +493,7 @@ function QuoteCard({
           text,
           url: buildQuoteShareUrl(quote.id),
         })
+        announce(t('status.shared'))
         return
       } catch {
         // El usuario canceló o no está soportado: caer al copiado.
@@ -497,6 +501,7 @@ function QuoteCard({
     }
     if (await copyToClipboard()) {
       setShared(true)
+      announce(t('status.copied'))
       setTimeout(() => setShared(false), 1600)
     }
   }
@@ -527,7 +532,10 @@ function QuoteCard({
       depthShallow={isRich && !prefersReducedMotion ? { transform: 'translateZ(25px)' } : undefined}
       t={t}
       locale={locale}
-      onToggleFavorite={() => toggleFavorite(quote.id)}
+      onToggleFavorite={() => {
+        announce(fav ? t('status.favRemoved') : t('status.favAdded'))
+        toggleFavorite(quote.id)
+      }}
       onCopy={handleCopy}
       onShare={handleShare}
       onLinkedIn={handleLinkedInShare}

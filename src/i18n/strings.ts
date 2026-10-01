@@ -78,6 +78,15 @@ const es: Dict = {
   'card.shareTitle': 'Filosofuss',
   'card.shareLinkedIn': 'Compartir en LinkedIn',
 
+  // Anuncios aria-live (Task C8)
+  'status.copied': 'Copiado',
+  'status.shared': 'Texto compartido',
+  'status.favAdded': 'Añadido a favoritos',
+  'status.favRemoved': 'Quitado de favoritos',
+  'status.playing': 'Reproduciendo…',
+  'status.paused': 'En pausa',
+  'status.loading': 'Cargando…',
+
   // Explorar
   'browse.label': 'Catálogo',
   'browse.titleA': 'Explora el ',
@@ -212,6 +221,15 @@ const en: Dict = {
   'card.anon': 'Anonymous',
   'card.shareTitle': 'Filosofuss',
   'card.shareLinkedIn': 'Share on LinkedIn',
+
+  // aria-live announcements (Task C8)
+  'status.copied': 'Copied',
+  'status.shared': 'Text shared',
+  'status.favAdded': 'Added to favorites',
+  'status.favRemoved': 'Removed from favorites',
+  'status.playing': 'Playing…',
+  'status.paused': 'Paused',
+  'status.loading': 'Loading…',
 
   // Explore
   'browse.label': 'Catalog',
