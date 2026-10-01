@@ -14,11 +14,12 @@ Todas las compuertas duras del DoD se cumplen: **typecheck estricto 0**, **build
 
 Mejoras materiales frente a `main` (`c3fd246`): DOM de `/explorar` 35.748 → 1.189 (−96,7 %),
 long tasks en `/explorar` 15 (1.619 ms) → 0, heap 73,1 MB → 10 MB, audio 70,5 MB → 24,3 MB,
-fuentes 190,5 KB (Google) → 54,5 KB (self-host), precache 34,8 MiB → 11,6 KiB y `npm audit` 11 → 5.
+fuentes 190,5 KB (Google) → 54,5 KB (self-host), precache 34,8 MiB → 11,6 KiB y `npm audit` 11 → **4 (0 críticas)**.
 
-Dos desviaciones requieren decisión del usuario: el binario **`terser`** y **`playwright-core`** se añadieron
-como dependencias de desarrollo sin aprobación explícita, y el `npm audit` restante **no** es sólo
-esbuild+vite: incluye también la cadena de **Vitest** (critical). Ver §8.
+El `npm audit` final queda en **crítico 0 · alto 1 · moderado 3**, todo en `devDependencies`: `vite` (HIGH
+`GHSA-fx2h-pf6j-xcff`) más `esbuild` y `@vitest/mocker` (moderates). El crítico previo `GHSA-5xrq-8626-4rwp`
+se limpió subiendo `vitest` de 2.1.9 a **3.2.7**. Los restantes sólo se resuelven con **Vite 8**, upgrade que
+**no está aprobado**. Dos desviaciones siguen requiriendo decisión del usuario: `terser` y `playwright-core`. Ver §8.
 
 ---
 
@@ -35,7 +36,7 @@ esbuild+vite: incluye también la cadena de **Vitest** (critical). Ver §8.
 | `node scripts/check-contrast.mjs` | **0** | PASS — 33 comprobaciones, 0 fallos, 3 temas ≥ AA |
 | `node scripts/check-parity.mjs` | **0** | PASS — paridad 507/507; 0 textos duplicados |
 | `node e2e/focus-keyboard.mjs` (extra) | **0** | **28/28 PASS** (focus trap, Escape, restauración, aria-live) |
-| `npm audit --json` | 1 (esperado) | **5 vulns** = 1 critical + 1 high + 3 moderate (ver §2.2) |
+| `npm audit --json` | 1 (esperado) | **4 vulns** = 0 critical + 1 high + 3 moderate, todas dev-only (ver §2.2) |
 | `git log --oneline c3fd246..HEAD` | 0 | 17 commits (ver §7) |
 | `git status --short` | 0 | limpio (sólo `?? docs/capturas/` antes del commit) |
 
@@ -48,19 +49,21 @@ esbuild+vite: incluye también la cadena de **Vitest** (critical). Ver §8.
 | `src/hooks/useAudioAnalyser.ts` | 1 | `react-hooks/set-state-in-effect` (29:7) |
 | **Total** | **10** | **0 errores** |
 
-### 2.2 `npm audit --json` (5 pendientes, todas devDependencies)
+### 2.2 `npm audit --json` (4 pendientes, todas devDependencies)
 
-| Paquete | Severidad | Fix disponible | Vía |
-|---|---|---|---|
-| `vitest` | **critical** | 5.0.3 | major de Vitest |
-| `vite` | high | 8.3.1 | major de Vite |
-| `@vitest/mocker` | moderate | 5.0.3 | major de Vitest |
-| `esbuild` | moderate | 8.3.1 | major de Vite |
-| `vite-node` | moderate | 5.0.3 | major de Vitest |
+Estado final: **crítico 0 · alto 1 · moderado 3**.
 
-**Nota (desviación):** el plan/encargo anticipaba «esbuild + vite como únicos restantes». La medición real
-muestra además la cadena de **Vitest** (`vitest` critical, `@vitest/mocker`, `vite-node`). Ninguna afecta al
-runtime de producción (todas `devDependencies`); se resuelven con **upgrade mayor** Vite 8 / Vitest 5.
+| Paquete | Severidad | Advisory | Fix disponible | Vía |
+|---|---|---|---|---|
+| `vite` | **high** | `GHSA-fx2h-pf6j-xcff` | 8.3.1 | major de Vite |
+| `esbuild` | moderate | `GHSA-67mh-4wv8-2f99` | 8.3.1 | major de Vite |
+| `@vitest/mocker` | moderate | `GHSA-82fw-gwwq-j7x9` | 4.1.11 | mayor de Vitest |
+| `vitest` | moderate | `GHSA-82fw-gwwq-j7x9` | 4.1.11 | mayor de Vitest |
+
+**Nota:** el crítico `GHSA-5xrq-8626-4rwp` que arrastraba la cadena de Vitest quedó **eliminado** al subir
+`vitest` de `2.1.9` a **`3.2.7`**. Las 4 restantes son dev-only, no afectan al runtime de producción (el
+servidor de desarrollo no se expone en producción) y sólo se cierran con **Vite 8** (major **no aprobado**)
+más la cadena de Vitest 4.
 
 ---
 
@@ -117,7 +120,7 @@ Generado con `scripts/lighthouse.mjs` (invoca `npx --yes lighthouse@12`, no inst
 | Audio total | 70,5 MB (36,5 música + 34,0 voz; 1.019 `.mp3`) | **24.269.356 B (24,3 MB; 1.019 `.m4a`, 0 `.mp3`)** | −65,5 % |
 | Fuentes | 190.548 B (Google, 4 familias) | **54.456 B (4 `.woff2` self-host)** | −71 % |
 | Precache SW (install) | 5 MP3 ≈ 34,8 MiB | **11.577 B (0 audio)** | −99,97 % |
-| `npm audit` | 11 (7 high, 4 moderate) | **5 (1 critical, 1 high, 3 moderate)** | −6 |
+| `npm audit` | 11 (7 high, 4 moderate) | **4 (0 critical, 1 high, 3 moderate)** | −7 |
 | Corpus | 507 ES / 507 EN / 37 filósofos | 507/507, 0 duplicados | paridad |
 
 Mediciones de DOM/heap/long tasks tomadas con Chromium local (Playwright) sobre el build servido; las de
@@ -203,8 +206,10 @@ no quedan restos y `android/` no se tocó.
 
 ### 8.2 Pendiente / decisiones abiertas
 
-- **Vite major (SEC-02):** no aplicado. Quedan `vite` (high) y `esbuild` (moderate) sólo resolubles con **Vite 8**.
-- **Vitest major:** `npm audit` reporta `vitest` (critical) + `@vitest/mocker`, `vite-node`; se limpian con **Vitest 5**.
+- **Vite major (SEC-02):** no aplicado (**no aprobado**). Quedan `vite` (high `GHSA-fx2h-pf6j-xcff`) y
+  `esbuild` (moderate), sólo resolubles con **Vite 8**.
+- **Vitest:** el crítico (`GHSA-5xrq-8626-4rwp`) ya está **resuelto** con `vitest@3.2.7` (reemplaza a `2.1.9`);
+  permanece `@vitest/mocker` (moderate) que se limpia con la cadena de Vitest 4.
 - **Endurecimiento Android (D6):** diferido (firma, `minify`, `network_security_config`); sin keystore de release.
 - **`npx cap sync` nativo:** pendiente; los plugins Capacitor están instalados pero `android/` no se sincronizó
   (y no debe tocarse en este paso).
