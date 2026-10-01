@@ -16,7 +16,7 @@ export function CssEqualizer({
   className,
 }: {
   active?: boolean
-  className?: string
+  className?: string | undefined
 }) {
   const reduceMotion = usePrefersReducedMotion()
   const animate = active && !reduceMotion

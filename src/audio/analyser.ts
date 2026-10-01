@@ -107,7 +107,7 @@ export function levels(analyser: AnalyserNode, bars: number): Uint8Array {
     let sum = 0
     let n = 0
     for (let j = start; j < end && j < bins; j++) {
-      sum += frequency[j]
+      sum += frequency[j] ?? 0
       n += 1
     }
     out[i] = n > 0 ? Math.round(sum / n) : 0

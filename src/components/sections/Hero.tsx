@@ -30,7 +30,7 @@ export default function Hero() {
   // subtítulo → CTAs. `initial={false}` bajo reduced-motion (sin animación).
   const fadeUp = (delay: number) => ({
     initial: reduceMotion ? false : { opacity: 0, y: 12 },
-    animate: reduceMotion ? undefined : { opacity: 1, y: 0 },
+    animate: reduceMotion ? false : { opacity: 1, y: 0 },
     transition: { delay: reduceMotion ? 0 : delay, duration: 0.4, ease: EASE },
   })
 
@@ -68,13 +68,13 @@ export default function Hero() {
           aria-hidden="true"
           className="mb-8 h-px w-44 origin-center bg-gradient-to-r from-gold via-copper to-ember sm:w-56"
           initial={reduceMotion ? false : { scaleX: 0 }}
-          animate={reduceMotion ? undefined : { scaleX: 1 }}
+          animate={reduceMotion ? false : { scaleX: 1 }}
           transition={{ delay: reduceMotion ? 0 : 0.55, duration: 0.4, ease: EASE }}
         />
 
         {/* Cita monumental — revelado por máscara + parallax (Δ ≤ 12 px) */}
         <m.div
-          style={reduceMotion ? undefined : { y: parallaxY }}
+          style={reduceMotion ? {} : { y: parallaxY }}
           className="[will-change:transform]"
         >
           <AnimatedQuote

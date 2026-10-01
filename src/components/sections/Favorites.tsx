@@ -25,13 +25,13 @@ export default function Favorites() {
     <section className="relative mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
       {/* Una única secuencia de reveal por vista (§3.2). */}
       <m.div
-        variants={reduceMotion ? undefined : revealContainer}
+        variants={reduceMotion ? {} : revealContainer}
+        whileInView={reduceMotion ? {} : 'show'}
         initial={reduceMotion ? false : 'hidden'}
-        whileInView={reduceMotion ? undefined : 'show'}
         viewport={{ once: true, amount: 0.25 }}
       >
         <m.header
-          variants={reduceMotion ? undefined : revealItem}
+          variants={reduceMotion ? {} : revealItem}
           className="mx-auto max-w-2xl text-center"
         >
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
@@ -49,7 +49,7 @@ export default function Favorites() {
 
         {favQuotes.length === 0 ? (
           <m.div
-            variants={reduceMotion ? undefined : revealItem}
+            variants={reduceMotion ? {} : revealItem}
             className="mx-auto mt-12 flex max-w-md flex-col items-center gap-5 rounded-3xl border border-line-soft bg-glass px-6 py-14 text-center"
           >
             <span className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-accent-3/30 to-accent-2/30">
@@ -68,7 +68,7 @@ export default function Favorites() {
         ) : (
           <>
             <m.div
-              variants={reduceMotion ? undefined : revealItem}
+              variants={reduceMotion ? {} : revealItem}
               className="mt-10 flex justify-center"
             >
               <button
@@ -80,7 +80,7 @@ export default function Favorites() {
                 {t('fav.clear')}
               </button>
             </m.div>
-            <m.div variants={reduceMotion ? undefined : revealItem}>
+            <m.div variants={reduceMotion ? {} : revealItem}>
               <m.div
                 layout
                 className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
@@ -91,7 +91,7 @@ export default function Favorites() {
                       key={q.id}
                       layout
                       initial={false}
-                      exit={reduceMotion ? undefined : { opacity: 0, scale: 0.96 }}
+                      exit={reduceMotion ? {} : { opacity: 0, scale: 0.96 }}
                       transition={{ duration: reduceMotion ? 0 : 0.25 }}
                     >
                       <QuoteCard quote={q} index={i} />

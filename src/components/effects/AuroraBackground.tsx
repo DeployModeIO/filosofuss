@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react'
+import type { MotionStyle } from 'framer-motion'
 import { m } from 'framer-motion'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
@@ -41,7 +42,10 @@ const BLOBS: AuroraBlob[] = [
   },
 ]
 
-const BLOB_STYLE = (blob: AuroraBlob): CSSProperties => ({
+// La intersección permite asignar el mismo objeto tanto a un `style` de DOM
+// (`CSSProperties`) como al `style` de un componente de Framer Motion
+// (`MotionStyle`), cuyos índices de propiedad no admiten `undefined`.
+const BLOB_STYLE = (blob: AuroraBlob): CSSProperties & MotionStyle => ({
   width: blob.size,
   height: blob.size,
   left: blob.left,

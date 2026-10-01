@@ -203,8 +203,15 @@ export function getQuoteOfTheDay(date: Date = new Date()): Quote {
   const d = date.getDate();
   const seed = hashCode(`${y}-${m}-${d}`);
   const len = quotes.length;
+  if (len === 0) {
+    throw new Error("getQuoteOfTheDay: el corpus de citas está vacío");
+  }
   const index = ((seed % len) + len) % len; // módulo seguro para negativos.
-  return quotes[index];
+  const quote = quotes[index];
+  if (quote === undefined) {
+    throw new Error("getQuoteOfTheDay: índice de cita fuera de rango");
+  }
+  return quote;
 }
 
 /** Eras distintas presentes en el catálogo, ordenadas. */

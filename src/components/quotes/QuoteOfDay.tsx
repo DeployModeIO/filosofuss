@@ -43,7 +43,7 @@ export default function QuoteOfDay() {
       {/* Label */}
       <m.div
         initial={prefersReducedMotion ? false : { opacity: 0, y: -8 }}
-        animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+        animate={prefersReducedMotion ? false : { opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="relative z-10 mb-8 flex items-center gap-3"
       >
@@ -69,7 +69,7 @@ export default function QuoteOfDay() {
       {/* Attribution */}
       <m.div
         initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
-        animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+        animate={prefersReducedMotion ? false : { opacity: 1, y: 0 }}
         transition={{ delay: 0.6, duration: 0.5 }}
         className="relative z-10 mt-8 flex flex-col items-center gap-1"
       >
@@ -88,7 +88,7 @@ export default function QuoteOfDay() {
       {/* CTA */}
       <m.div
         initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
-        animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+        animate={prefersReducedMotion ? false : { opacity: 1, y: 0 }}
         transition={{ delay: 0.8, duration: 0.5 }}
         className="relative z-10 mt-10"
       >

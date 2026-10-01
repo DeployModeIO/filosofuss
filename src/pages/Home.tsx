@@ -27,18 +27,18 @@ export default function Home() {
         contenido de Home con 3 hijos escalonados (≤6, stagger 0.06 s).
       */}
       <m.div
-        variants={reduceMotion ? undefined : revealContainer}
+        variants={reduceMotion ? {} : revealContainer}
+        whileInView={reduceMotion ? {} : 'show'}
         initial={reduceMotion ? false : 'hidden'}
-        whileInView={reduceMotion ? undefined : 'show'}
         viewport={{ once: true, amount: 0.25 }}
       >
-        <m.div variants={reduceMotion ? undefined : revealItem}>
+        <m.div variants={reduceMotion ? {} : revealItem}>
           <QuoteOfDay />
         </m.div>
 
         {/* Citas destacadas */}
         <m.section
-          variants={reduceMotion ? undefined : revealItem}
+          variants={reduceMotion ? {} : revealItem}
           className="relative mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 sm:py-24"
         >
           <header className="mx-auto max-w-2xl text-center">
@@ -63,7 +63,7 @@ export default function Home() {
 
         {/* CTA final */}
         <m.section
-          variants={reduceMotion ? undefined : revealItem}
+          variants={reduceMotion ? {} : revealItem}
           className="relative mx-auto flex w-full max-w-3xl flex-col items-center gap-4 px-5 py-16 text-center sm:flex-row sm:justify-center sm:px-8 sm:py-24"
         >
           <Link to="/explorar" className="btn-primary text-base">

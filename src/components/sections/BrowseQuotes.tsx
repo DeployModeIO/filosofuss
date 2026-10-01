@@ -139,13 +139,13 @@ export default function BrowseQuotes() {
   return (
     <section className="relative mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
       <m.div
-        variants={reduceMotion ? undefined : revealContainer}
+        variants={reduceMotion ? {} : revealContainer}
+        whileInView={reduceMotion ? {} : 'show'}
         initial={reduceMotion ? false : 'hidden'}
-        whileInView={reduceMotion ? undefined : 'show'}
         viewport={{ once: true, amount: 0.25 }}
       >
         <m.header
-          variants={reduceMotion ? undefined : revealItem}
+          variants={reduceMotion ? {} : revealItem}
           className="mx-auto max-w-2xl text-center"
         >
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
@@ -161,7 +161,7 @@ export default function BrowseQuotes() {
         </m.header>
 
         <m.div
-          variants={reduceMotion ? undefined : revealItem}
+          variants={reduceMotion ? {} : revealItem}
           className="mx-auto mt-10 flex max-w-3xl flex-col gap-5"
         >
           <SearchBar query={query} onQuery={setQuery} />
@@ -181,7 +181,7 @@ export default function BrowseQuotes() {
         </m.div>
 
         <m.div
-          variants={reduceMotion ? undefined : revealItem}
+          variants={reduceMotion ? {} : revealItem}
           className="mx-auto mt-8 flex max-w-6xl flex-wrap items-center justify-between gap-3"
         >
           <p className="text-sm text-muted">

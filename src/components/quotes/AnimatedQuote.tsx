@@ -20,8 +20,8 @@ export default function AnimatedQuote({ text, className }: AnimatedQuoteProps) {
     <m.blockquote
       variants={heroReveal}
       initial={reduceMotion ? false : 'hidden'}
-      animate={reduceMotion ? undefined : 'show'}
-      style={reduceMotion ? undefined : { willChange: 'transform, opacity' }}
+      animate={reduceMotion ? false : 'show'}
+      style={reduceMotion ? {} : { willChange: 'transform, opacity' }}
       className={className}
     >
       {`“${text}”`}

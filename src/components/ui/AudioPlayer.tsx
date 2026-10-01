@@ -54,8 +54,8 @@ function IconButton({
       title={label}
       aria-expanded={expanded}
       aria-controls={controls}
-      whileHover={reduceMotion || !hoverScale ? undefined : { scale: 1.05, transition: spring.press }}
-      whileTap={reduceMotion ? undefined : { scale: 0.94, transition: spring.press }}
+      whileHover={reduceMotion || !hoverScale ? {} : { scale: 1.05, transition: spring.press }}
+      whileTap={reduceMotion ? {} : { scale: 0.94, transition: spring.press }}
       className={className}
     >
       {children}

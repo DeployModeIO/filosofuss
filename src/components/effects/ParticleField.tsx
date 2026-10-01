@@ -14,6 +14,7 @@ interface Particle {
 }
 
 const COLORS = ['rgba(201,169,106,', 'rgba(176,113,63,', 'rgba(122,46,77,']
+const FALLBACK_COLOR = COLORS[0] ?? 'rgba(201,169,106,'
 
 function createParticles(width: number, height: number): Particle[] {
   // Cap duro de 40 partículas (Task C5 / P-14), antes hasta 70.
@@ -29,7 +30,7 @@ function createParticles(width: number, height: number): Particle[] {
       swaySpeed: Math.random() * 0.6 + 0.3,
       phase: Math.random() * Math.PI * 2,
       alpha: Math.random() * 0.5 + 0.2,
-      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      color: COLORS[Math.floor(Math.random() * COLORS.length)] ?? FALLBACK_COLOR,
     })
   }
   return particles

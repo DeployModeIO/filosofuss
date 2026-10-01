@@ -34,6 +34,9 @@ const NarrationContext = createContext<NarrationContextValue | undefined>(undefi
 
 const LANG_KEY = 'filosofuss:narration-lang'
 
+// Guarda de forma: un idioma persistido no soportado degrada a 'es'.
+const isVoiceLang = (v: unknown): v is VoiceLang => v === 'es' || v === 'en'
+
 /** Idiomas de narración soportados (mismo contrato público que `voiceLangs`). */
 const VOICE_LANGS: readonly VoiceLang[] = ['es', 'en'] as const
 
@@ -60,7 +63,7 @@ export function NarrationProvider({ children }: { children: ReactNode }) {
     audioRef.current = new Audio()
   }
 
-  const [lang, setLang] = useLocalStorage<VoiceLang>(LANG_KEY, 'es')
+  const [lang, setLang] = useLocalStorage<VoiceLang>(LANG_KEY, 'es', isVoiceLang)
   const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null)
   const [isNarrating, setIsNarrating] = useState(false)
   const voiceManifestRef = useRef<VoiceManifestModule | null>(null)

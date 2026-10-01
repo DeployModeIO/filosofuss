@@ -5,8 +5,6 @@
 
 export type Locale = 'es' | 'en'
 
-export const LOCALES: Locale[] = ['es', 'en']
-
 type Dict = Record<string, string>
 
 const es: Dict = {

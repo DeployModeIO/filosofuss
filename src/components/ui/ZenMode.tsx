@@ -28,6 +28,11 @@ import Dialog from '@/components/ui/Dialog'
 
 const MAX_SIZE = 5
 
+// Guardas de forma para las preferencias de lectura persistidas (COD-04).
+const isSize = (v: unknown): v is number =>
+  typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= MAX_SIZE
+const isBoolean = (v: unknown): v is boolean => typeof v === 'boolean'
+
 /**
  * Scrollable quote area with a subtle parallax shift (±12 px total, §3.3).
  * It is mounted only while a quote is open, so `useScroll` always finds its
@@ -49,7 +54,7 @@ function ParallaxQuote({
       className="flex flex-1 items-center justify-center overflow-y-auto px-6 py-8"
     >
       <m.div
-        style={reduceMotion ? undefined : { y: parallaxY }}
+        style={reduceMotion ? {} : { y: parallaxY }}
         className="mx-auto flex max-w-3xl flex-col items-center text-center [will-change:transform]"
       >
         {children}
@@ -62,8 +67,8 @@ export default function ZenMode() {
   const reduceMotion = usePrefersReducedMotion()
   const { zenQuoteId, closeZen, openZen, t, locale } = useApp()
   const { activeQuoteId, isNarrating, toggle } = useNarration()
-  const [size, setSize] = useLocalStorage<number>('filosofuss:zen:size', 2)
-  const [serif, setSerif] = useLocalStorage<boolean>('filosofuss:zen:serif', true)
+  const [size, setSize] = useLocalStorage<number>('filosofuss:zen:size', 2, isSize)
+  const [serif, setSerif] = useLocalStorage<boolean>('filosofuss:zen:serif', true, isBoolean)
   const history = useRef<string[]>([])
 
   const quote = zenQuoteId ? getQuoteById(zenQuoteId) : undefined

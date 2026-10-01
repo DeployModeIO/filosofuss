@@ -88,7 +88,7 @@ function ActionButton({
       aria-label={label}
       title={label}
       aria-pressed={typeof active === 'boolean' ? active : undefined}
-      whileTap={prefersReducedMotion ? undefined : { scale: 0.9, transition: spring.press }}
+      whileTap={prefersReducedMotion ? {} : { scale: 0.9, transition: spring.press }}
       className={className}
     >
       {children}
@@ -98,15 +98,15 @@ function ActionButton({
 
 interface CardBodyProps {
   quote: Quote
-  phil?: Philosopher
+  phil?: Philosopher | undefined
   variant: QuoteCardVariant
   fav: boolean
   narratingThis: boolean
   copied: boolean
   shared: boolean
   showActions: boolean
-  depth?: { transform: string }
-  depthShallow?: { transform: string }
+  depth?: { transform: string } | undefined
+  depthShallow?: { transform: string } | undefined
   animated: boolean
   t: Translate
   locale: 'es' | 'en'
@@ -230,7 +230,7 @@ function CardBody({
             {animated ? (
               <m.span
                 animate={
-                  prefersReducedMotion ? undefined : { scale: fav ? [1, 1.35, 1] : 1 }
+                  prefersReducedMotion ? false : { scale: fav ? [1, 1.35, 1] : 1 }
                 }
                 transition={{ duration: 0.35, ease: 'easeOut' }}
                 className="grid place-items-center"
@@ -397,7 +397,7 @@ function RichCardFrame({
         onMouseMove={handlePointerMove}
         onMouseLeave={resetTilt}
         style={
-          prefersReducedMotion ? undefined : { rotateX, rotateY, transformStyle: 'preserve-3d' }
+          prefersReducedMotion ? {} : { rotateX, rotateY, transformStyle: 'preserve-3d' }
         }
         className={cn(
           'glass card-hover relative h-full overflow-hidden rounded-2xl p-6 sm:p-8',

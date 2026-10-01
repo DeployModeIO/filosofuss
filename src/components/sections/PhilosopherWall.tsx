@@ -5,7 +5,7 @@ import { BookOpen, Calendar, MapPin, X } from 'lucide-react'
 import { localizePhilosopher, philosophers } from '@/data/philosophers'
 import { getQuotesByPhilosopher } from '@/data/quotes'
 import type { Philosopher, Quote } from '@/types'
-import { cn, formatYear, hashCode } from '@/lib/utils'
+import { cn, formatYear, hashCode, initials } from '@/lib/utils'
 import { revealContainer, revealItem } from '@/lib/variants'
 import { useApp } from '@/context/AppContext'
 import QuoteCard from '@/components/quotes/QuoteCard'
@@ -16,24 +16,12 @@ const GRADIENTS = [
   'from-accent-2 to-accent-3',
   'from-accent-3 to-accent',
   'from-accent to-accent-3',
-]
+] as const
 
-const CONNECTORS = new Set(['y', 'de', 'del', 'la', 'el', 'da', 'di', 'le'])
-
-function initials(name: string): string {
-  const cleaned = name.replace(/\(.*?\)/g, '').trim()
-  const parts = cleaned
-    .split(/[\s-]+/)
-    .filter((p) => p.length > 0 && !CONNECTORS.has(p.toLowerCase()))
-  if (parts.length === 0) return '?'
-  if (parts.length === 1) return parts[0].charAt(0).toUpperCase()
-  return (
-    parts[0].charAt(0) + parts[parts.length - 1].charAt(0)
-  ).toUpperCase()
-}
+const DEFAULT_GRADIENT = GRADIENTS[0]
 
 function gradientFor(id: string): string {
-  return GRADIENTS[Math.abs(hashCode(id)) % GRADIENTS.length]
+  return GRADIENTS[Math.abs(hashCode(id)) % GRADIENTS.length] ?? DEFAULT_GRADIENT
 }
 
 export default function PhilosopherWall() {
@@ -59,13 +47,13 @@ export default function PhilosopherWall() {
   return (
     <section className="relative mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
       <m.div
-        variants={reduceMotion ? undefined : revealContainer}
+        variants={reduceMotion ? {} : revealContainer}
+        whileInView={reduceMotion ? {} : 'show'}
         initial={reduceMotion ? false : 'hidden'}
-        whileInView={reduceMotion ? undefined : 'show'}
         viewport={{ once: true, amount: 0.25 }}
       >
         <m.header
-          variants={reduceMotion ? undefined : revealItem}
+          variants={reduceMotion ? {} : revealItem}
           className="mx-auto max-w-2xl text-center"
         >
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
@@ -82,7 +70,7 @@ export default function PhilosopherWall() {
 
         {/* El muro entra como un único nodo: sin fade-up por tarjeta (§3.2). */}
         <m.div
-          variants={reduceMotion ? undefined : revealItem}
+          variants={reduceMotion ? {} : revealItem}
           className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4"
         >
           {philosophers.map((p) => {

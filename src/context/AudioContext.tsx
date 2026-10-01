@@ -39,6 +39,10 @@ const AudioContext = createContext<AudioContextValue | undefined>(undefined)
 const VOLUME_KEY = 'filosofuss:volume'
 const INITIAL_VOLUME = 0.4
 
+// Guarda de forma: un volumen persistido corrupto degrada al valor por defecto.
+const isVolume = (v: unknown): v is number =>
+  typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 1
+
 /**
  * Progreso de reproducción fuera del contexto raíz (Task B7 / PERF-10).
  * `timeupdate` emite ~4 Hz; mantenerlo en el `value` del provider re-renderiza
@@ -87,6 +91,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const [volume, setVolumeState] = useLocalStorage<number>(
     VOLUME_KEY,
     INITIAL_VOLUME,
+    isVolume,
   )
   const [isMuted, setIsMuted] = useState(false)
   const [duration, setDuration] = useState(0)
@@ -234,7 +239,9 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     }
   }, [goToIndex, play])
 
-  const currentTrack = tracks[trackIndex]
+  // `tracks` es una tupla no vacía: `tracks[0]` cubre el caso (inalcanzable) de
+  // un índice fuera de rango sin recurrir a aserciones.
+  const currentTrack = tracks[trackIndex] ?? tracks[0]
   const audioEl = audioRef.current
 
   const value = useMemo<AudioContextValue>(

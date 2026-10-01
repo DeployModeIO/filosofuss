@@ -31,7 +31,7 @@ interface FocusTrapOptions {
   containerRef: RefObject<HTMLElement>
   active: boolean
   onEscape?: () => void
-  initialFocusRef?: RefObject<HTMLElement>
+  initialFocusRef?: RefObject<HTMLElement> | undefined
 }
 
 /**
@@ -82,6 +82,7 @@ export function useFocusTrap({
       }
       const first = items[0]
       const last = items[items.length - 1]
+      if (first === undefined || last === undefined) return
       const activeEl = document.activeElement
       if (event.shiftKey) {
         if (activeEl === first || !container.contains(activeEl)) {
@@ -170,7 +171,7 @@ export default function Dialog({
           )}
           initial={reduceMotion ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={reduceMotion ? undefined : { opacity: 0 }}
+          exit={reduceMotion ? {} : { opacity: 0 }}
           transition={{ duration }}
         >
           {!isFullscreen && (
@@ -193,7 +194,7 @@ export default function Dialog({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={
               reduceMotion || isFullscreen
-                ? undefined
+                ? {}
                 : { opacity: 0, y: 24, scale: 0.97 }
             }
             transition={reduceMotion ? { duration: 0 } : spring.hover}
