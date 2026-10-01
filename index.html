@@ -54,6 +54,10 @@
       crossorigin
     />
 
+    <!-- Bloques inline (estilo base y bootstrap de tema): la CSP de nginx
+         (Dockerfile -> security-headers.conf) fija sus hashes SHA-256. Si
+         editas el bloque style inline o el script de tema, recalcula los
+         hashes y actualízalos en el Dockerfile. -->
     <style>
       html,
       body,
