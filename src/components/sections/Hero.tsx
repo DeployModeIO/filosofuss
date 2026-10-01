@@ -35,7 +35,7 @@ export default function Hero() {
   return (
     <section
       ref={sectionRef}
-      className="relative flex min-h-[92vh] w-full items-center justify-center overflow-hidden px-5 py-24 sm:px-8"
+      className="relative flex min-h-[92svh] w-full items-center justify-center overflow-hidden px-5 py-24 sm:px-8"
     >
       {/* Elementos decorativos */}
       <Quote

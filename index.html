@@ -8,10 +8,12 @@
       content="Filosofuss — una colección curada de citas filosóficas inmortales de los grandes pensadores de la historia. Explora la sabiduría eterna."
     />
     <title>Filosofuss — Sabiduría eterna</title>
+    <link rel="canonical" href="https://filosofuss.app/" />
 
     <!-- Open Graph / redes sociales (LinkedIn, X, Facebook…) -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Filosofuss" />
+    <meta property="og:url" content="https://filosofuss.app/" />
     <meta property="og:title" content="Filosofuss — Sabiduría eterna" />
     <meta
       property="og:description"
@@ -26,8 +28,8 @@
     />
     <meta name="twitter:image" content="https://filosofuss.app/icons/icon-512.png" />
 
-    <!-- PWA: Web App Manifest -->
-    <link rel="manifest" href="/manifest.webmanifest" />
+    <!-- PWA: Web App Manifest (ruta relativa para soportar subruta / Capacitor) -->
+    <link rel="manifest" href="./manifest.webmanifest" />
     <meta name="theme-color" content="#0a0a0f" />
 
     <!-- PWA: iOS / Apple (crítico para instalar en iPhone) -->
@@ -98,6 +100,38 @@
           }
         } catch(e) {}
       })();
+    </script>
+
+    <!-- SEO: datos estructurados (Schema.org) con URLs absolutas -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://filosofuss.app/#website",
+            "url": "https://filosofuss.app/",
+            "name": "Filosofuss",
+            "description": "Colección curada de citas filosóficas inmortales de los grandes pensadores de la historia.",
+            "inLanguage": "es",
+            "publisher": { "@id": "https://filosofuss.app/#website" }
+          },
+          {
+            "@type": "CollectionPage",
+            "@id": "https://filosofuss.app/#collection",
+            "url": "https://filosofuss.app/",
+            "name": "Filosofuss — Sabiduría eterna",
+            "description": "Explora citas filosóficas inmortales por autor, era y escuela.",
+            "inLanguage": "es",
+            "isPartOf": { "@id": "https://filosofuss.app/#website" },
+            "about": { "@type": "Thing", "name": "Filosofía" },
+            "primaryImageOfPage": {
+              "@type": "ImageObject",
+              "url": "https://filosofuss.app/icons/icon-512.png"
+            }
+          }
+        ]
+      }
     </script>
   </head>
   <body>

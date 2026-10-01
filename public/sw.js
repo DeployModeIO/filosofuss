@@ -2,38 +2,29 @@
  * Filosofuss — Service Worker (PWA, soporte offline)
  * JS plano, sin dependencias externas. Se sirve desde /sw.js
  * Estrategia:
- *   - Precacheo del app shell al instalar.
- *   - Navegaciones: network-first (fallback a /index.html y /).
- *   - Assets del mismo origen (JS/CSS/img/audio): stale-while-revalidate.
- *   - Resto de peticiones (cross-origin): pasan directas a la red.
+ *   - Precacheo del app shell + página offline al instalar.
+ *   - Navegaciones: network-first (fallback al shell cacheado y a
+ *     /offline.html). No cachea errores ni respuestas no-HTML.
+ *   - Assets del mismo origen (JS/CSS/img): stale-while-revalidate.
+ *   - Audio (.m4a/.mp3): on-demand, fuera del precache (SWR).
+ *   - Resto de peticiones (cross-origin, p. ej. Google Fonts): directas.
  * ===================================================================== */
 
 // Nombre de caché versionado por build. `public/` es estático, así que la
 // versión se mantiene aquí: al publicar una release, actualiza BUILD (fecha o
 // hash) para invalidar las cachés antiguas (el `activate` ya borra las demás).
-const BUILD = '2026-09-30';
+const BUILD = '2026-10-01';
 const CACHE = `filosofuss-${BUILD}`;
 
 // App shell que se precachea al instalar. Rutas absolutas (hosting en raíz).
-// El audio (.m4a) NO se precachea: se cachea on-demand al reproducir (SWR).
+// El audio (.m4a/.mp3) NO se precachea: se cachea on-demand al reproducir (SWR).
+// Presupuesto de instalación: ≤1 MiB (HTML shell + manifest + página offline).
 const PRECACHE_URLS = [
   '/',
   '/index.html',
   '/manifest.webmanifest',
+  '/offline.html',
 ];
-
-// Fallback offline mínimo inline (evita depender de un asset externo que no
-// forma parte del precache). Se sirve solo cuando no hay red ni app shell cacheado.
-const OFFLINE_HTML =
-  '<!doctype html><html lang="es"><head><meta charset="utf-8">' +
-  '<meta name="viewport" content="width=device-width,initial-scale=1">' +
-  '<title>Sin conexión · Filosofuss</title>' +
-  '<style>body{margin:0;min-height:100svh;display:flex;align-items:center;' +
-  'justify-content:center;background:#0A0A0F;color:#ECE8E1;' +
-  'font:16px/1.6 system-ui,sans-serif;text-align:center;padding:24px}' +
-  'a{color:#C9A96A}</style></head><body><main><h1>Sin conexión</h1>' +
-  '<p>Comprueba tu conexión y vuelve a intentarlo.</p>' +
-  '<p><a href="./">Reintentar</a></p></main></body></html>';
 
 // --- Instalación: precacheo del app shell. ---------------------------
 self.addEventListener('install', (event) => {
@@ -71,7 +62,10 @@ self.addEventListener('fetch', (event) => {
   // Solo gestionamos GET. El resto pasa al navegador.
   if (request.method !== 'GET') return;
 
+  // El propio SW nunca se cachea (SEC-27/W-02): siempre se sirve de la red.
   const url = new URL(request.url);
+  if (url.pathname.endsWith('/sw.js')) return;
+
   const sameOrigin = url.origin === self.location.origin;
 
   // 1) Navegaciones (carga de documentos HTML): network-first.
@@ -89,15 +83,14 @@ self.addEventListener('fetch', (event) => {
           }
           return fresh;
         } catch (err) {
-          // Sin red: app shell cacheado o fallback offline mínimo inline.
+          // Sin red: app shell cacheado o página offline dedicada.
           const cache = await caches.open(CACHE);
           const cached =
-            (await cache.match('/index.html')) || (await cache.match('/'));
+            (await cache.match('/index.html')) ||
+            (await cache.match('/')) ||
+            (await cache.match('/offline.html'));
           if (cached) return cached;
-          return new Response(OFFLINE_HTML, {
-            status: 200,
-            headers: { 'content-type': 'text/html; charset=utf-8' },
-          });
+          return Response.error();
         }
       })()
     );
@@ -126,6 +119,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3) Resto de peticiones (cross-origin no gestionadas): navegador normal.
-  //    No usamos event.respondWith: la petición pasa a la red por defecto.
+  // 3) Resto de peticiones (cross-origin no gestionadas, p. ej. Google Fonts):
+  //    no usamos event.respondWith: la petición pasa a la red por defecto.
 });

@@ -132,7 +132,7 @@ export default function Navbar() {
   return (
     <header
       className={cn(
-        'sticky top-0 z-50 border-b border-line-soft transition-all duration-300',
+        'sticky top-0 z-50 border-b border-line-soft pt-[max(0px,env(safe-area-inset-top))] transition-all duration-300',
         scrolled ? 'glass-strong shadow-card' : 'glass',
       )}
     >

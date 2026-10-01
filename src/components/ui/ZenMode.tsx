@@ -99,12 +99,12 @@ export default function ZenMode() {
       onClose={closeZen}
       variant="fullscreen"
       labelledBy="zen-title"
-      className="text-content"
+      className="text-content pt-0 pb-0"
     >
       {quote && (
         <>
           {/* Barra superior */}
-          <div className="flex items-center justify-between px-5 py-4 sm:px-8">
+          <div className="flex items-center justify-between px-5 pb-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-8">
             <span
               id="zen-title"
               className="font-sans text-xs font-semibold uppercase tracking-[0.3em] text-accent"
@@ -152,7 +152,7 @@ export default function ZenMode() {
           </ParallaxQuote>
 
           {/* Barra inferior de controles */}
-          <div className="flex flex-wrap items-center justify-center gap-2 px-5 py-5 sm:gap-3 sm:px-8">
+          <div className="flex flex-wrap items-center justify-center gap-2 px-5 pt-5 pb-[max(1rem,env(safe-area-inset-bottom))] sm:gap-3 sm:px-8">
             <button
               type="button"
               onClick={prev}
