@@ -7,6 +7,7 @@ import { formatYear } from '@/lib/utils'
 import { useNarration } from '@/context/NarrationContext'
 import { useApp } from '@/context/AppContext'
 import { getQuoteSource, getQuoteText } from '@/data/quotes'
+import { localizePhilosopher } from '@/data/philosophers'
 import AnimatedQuote from '@/components/quotes/AnimatedQuote'
 
 export default function QuoteOfDay() {
@@ -15,6 +16,7 @@ export default function QuoteOfDay() {
   const { activeQuoteId, isNarrating, toggle } = useNarration()
   const { t, locale } = useApp()
   const narratingThis = isNarrating && activeQuoteId === quote.id
+  const display = philosopher ? localizePhilosopher(philosopher, locale) : undefined
 
   return (
     <section className="relative mx-auto flex w-full max-w-3xl flex-col items-center overflow-hidden px-4 py-16 text-center sm:py-24">
@@ -72,12 +74,12 @@ export default function QuoteOfDay() {
         className="relative z-10 mt-8 flex flex-col items-center gap-1"
       >
           <span className="font-display text-xl text-accent">
-           {philosopher?.name ?? t('qod.anon')}
+           {display?.name ?? t('qod.anon')}
           </span>
-        {philosopher && (
+        {display && philosopher && (
           <span className="text-sm text-muted">
-            {philosopher.era} · {philosopher.school} · {formatYear(philosopher.birthYear)}–
-            {formatYear(philosopher.deathYear)}
+            {display.era} · {display.school} · {formatYear(philosopher.birthYear, locale)}–
+            {formatYear(philosopher.deathYear, locale)}
           </span>
         )}
         {quote.source && <span className="text-xs italic text-muted">— {getQuoteSource(quote, locale)}</span>}

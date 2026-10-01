@@ -1,6 +1,23 @@
 import { philosophers } from "./philosophers";
 import type { Philosopher, Quote, QuoteEn, Tag } from "@/types";
 import { hashCode, normalize, pickRandom } from "@/lib/utils";
+import { translate } from "@/i18n/strings";
+
+/**
+ * Ids retirados del corpus por duplicar el texto de otro registro (COD-10).
+ * Se conservan como alias para no romper enlaces compartidos (`?cita=`),
+ * favoritos antiguos ni el manifiesto de voz; resuelven al registro canónico.
+ */
+export const QUOTE_ALIASES: Readonly<Record<string, string>> = {
+  "q-spinoza-8": "q-spinoza-1",
+  "q-hume-8": "q-hume-3",
+  "q-schopenhauer-9": "q-schopenhauer-4",
+  "q-marx-9": "q-marx-3",
+  "q-marx-10": "q-marx-4",
+  "q-nietzsche-10": "q-nietzsche-6",
+  "q-wittgenstein-9": "q-wittgenstein-6",
+  "q-unamuno-7": "q-unamuno-3",
+};
 
 /**
  * Corpus de citas de Filosofuss.
@@ -77,6 +94,11 @@ export function applyQuoteCorpus(
     else byPhilosopher.set(quote.philosopherId, [quote]);
 
     const author = philosopherById.get(quote.philosopherId);
+    const translation = quoteTranslations[quote.id];
+    // El haystack incluye siempre el texto ES y el metadata EN del autor; en
+    // locale EN añade además el texto/obra traducidos y las etiquetas EN de los
+    // temas, de modo que buscar una palabra inglesa encuentra la cita
+    // (Review Focus #5, UX-10).
     search.push({
       quote,
       haystack: normalize(
@@ -88,11 +110,25 @@ export function applyQuoteCorpus(
           author?.fullName ?? "",
           author?.school ?? "",
           author?.era ?? "",
+          author?.nameEn ?? "",
+          author?.fullNameEn ?? "",
+          author?.schoolEn ?? "",
+          author?.eraEn ?? "",
+          quote.tags.map((tag) => translate("en", `tag.${tag}`)).join(" "),
+          translation?.text ?? "",
+          translation?.source ?? "",
         ].join(" "),
       ),
     });
 
     for (const tag of quote.tags) tags.push(tag);
+  }
+
+  // Los ids retirados por duplicado resuelven a su registro canónico para no
+  // romper deep links, favoritos antiguos ni el manifiesto de voz.
+  for (const [alias, canonical] of Object.entries(QUOTE_ALIASES)) {
+    const target = byId.get(canonical);
+    if (target && !byId.has(alias)) byId.set(alias, target);
   }
 
   quoteById = byId;

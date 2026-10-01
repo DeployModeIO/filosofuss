@@ -3,7 +3,8 @@ import { m, useScroll, useTransform } from 'framer-motion'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { Link } from 'react-router-dom'
 import { ArrowRight, ChevronDown, Quote, Sparkles, Users } from 'lucide-react'
-import { getPhilosopherById, getRandomQuote } from '@/data/quotes'
+import { getPhilosopherById, getQuoteText, getRandomQuote } from '@/data/quotes'
+import { localizePhilosopher } from '@/data/philosophers'
 import { useApp } from '@/context/AppContext'
 import AnimatedQuote from '@/components/quotes/AnimatedQuote'
 
@@ -11,9 +12,10 @@ const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
 
 export default function Hero() {
   const reduceMotion = usePrefersReducedMotion()
-  const { t } = useApp()
+  const { t, locale } = useApp()
   const [featured] = useState(() => getRandomQuote())
   const philosopher = getPhilosopherById(featured.philosopherId)
+  const display = philosopher ? localizePhilosopher(philosopher, locale) : undefined
 
   // Parallax sutil de la cita (±12 px totales, §3.3). No se aplica a fondos
   // con blur; solo al wrapper del bloque de cita.
@@ -76,7 +78,7 @@ export default function Hero() {
           className="[will-change:transform]"
         >
           <AnimatedQuote
-            text={featured.text}
+            text={getQuoteText(featured, locale)}
             className="font-serif text-3xl italic leading-snug text-content sm:text-5xl lg:text-6xl"
           />
         </m.div>
@@ -86,13 +88,13 @@ export default function Hero() {
           {...fadeUp(0.8)}
           className="mt-8 flex flex-col items-center gap-1"
         >
-          {philosopher && (
+          {display && (
             <>
               <span className="font-display text-xl text-accent sm:text-2xl">
-                {philosopher.name}
+                {display.name}
               </span>
               <span className="text-sm text-muted">
-                {philosopher.era} · {philosopher.school}
+                {display.era} · {display.school}
               </span>
             </>
           )}

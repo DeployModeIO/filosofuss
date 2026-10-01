@@ -411,13 +411,6 @@ export const quotesBatch4: Quote[] = [
 
   // ── Unamuno ──
   {
-    id: 'q-unamuno-7',
-    text: 'La fe que no duda es fe muerta.',
-    philosopherId: 'unamuno',
-    tags: ['alma', 'dios'],
-    source: 'Del sentimiento trágico de la vida',
-  },
-  {
     id: 'q-unamuno-8',
     text: 'El dolor es el camino de la conciencia y de la vida.',
     philosopherId: 'unamuno',

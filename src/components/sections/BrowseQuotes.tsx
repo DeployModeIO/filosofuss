@@ -4,6 +4,7 @@ import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { useWindowVirtualizer } from '@tanstack/react-virtual'
 import { Search, X } from 'lucide-react'
 import { quotes, searchQuotes, getPhilosopherById } from '@/data/quotes'
+import { localizeEra, localizeSchool } from '@/data/philosophers'
 import type { Quote, Tag } from '@/types'
 import { shuffle } from '@/lib/utils'
 import { revealContainer, revealItem } from '@/lib/variants'
@@ -29,7 +30,7 @@ function groupRows(items: Quote[], columns: number): Quote[][] {
 
 export default function BrowseQuotes() {
   const reduceMotion = usePrefersReducedMotion()
-  const { t } = useApp()
+  const { t, locale } = useApp()
   const [query, setQuery] = useState('')
   const [selectedEra, setSelectedEra] = useState<string | null>(null)
   const [selectedSchool, setSelectedSchool] = useState<string | null>(null)
@@ -111,16 +112,22 @@ export default function BrowseQuotes() {
 
   const chips: { label: string; clear: () => void }[] = []
   if (selectedEra) {
-    chips.push({ label: selectedEra, clear: () => setSelectedEra(null) })
+    chips.push({
+      label: localizeEra(selectedEra, locale),
+      clear: () => setSelectedEra(null),
+    })
   }
   if (selectedSchool) {
     chips.push({
-      label: selectedSchool,
+      label: localizeSchool(selectedSchool, locale),
       clear: () => setSelectedSchool(null),
     })
   }
   if (selectedTag) {
-    chips.push({ label: selectedTag, clear: () => setSelectedTag(null) })
+    chips.push({
+      label: t(`tag.${selectedTag}`),
+      clear: () => setSelectedTag(null),
+    })
   }
 
   const hasAny =

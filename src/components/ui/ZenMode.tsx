@@ -21,6 +21,7 @@ import {
   getQuoteText,
   getRandomQuote,
 } from '@/data/quotes'
+import { localizePhilosopher } from '@/data/philosophers'
 import { useLocalStorage } from '@/lib/storage'
 import { cn } from '@/lib/utils'
 import Dialog from '@/components/ui/Dialog'
@@ -67,6 +68,7 @@ export default function ZenMode() {
 
   const quote = zenQuoteId ? getQuoteById(zenQuoteId) : undefined
   const phil = quote ? getPhilosopherById(quote.philosopherId) : undefined
+  const display = phil ? localizePhilosopher(phil, locale) : undefined
 
   const next = () => {
     if (!quote) return
@@ -135,11 +137,11 @@ export default function ZenMode() {
             </blockquote>
 
             <div className="mt-8 flex flex-col items-center gap-1.5">
-              {phil && (
+              {display && (
                 <>
-                  <span className="font-display text-xl text-accent">{phil.name}</span>
+                  <span className="font-display text-xl text-accent">{display.name}</span>
                   <span className="text-sm text-muted">
-                    {phil.era} · {phil.school}
+                    {display.era} · {display.school}
                   </span>
                 </>
               )}

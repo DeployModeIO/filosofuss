@@ -8,6 +8,7 @@ import type { LucideIcon } from 'lucide-react'
 import { Calendar, Check, Clock, Copy, Heart, Landmark, Linkedin, Maximize2, Quote as QuoteIcon, Share2, Volume2, Square } from 'lucide-react'
 import type { Philosopher, Quote } from '@/types'
 import { getPhilosopherById, getQuoteSource, getQuoteText } from '@/data/quotes'
+import { localizePhilosopher } from '@/data/philosophers'
 import { buildQuoteShareUrl, cn, formatYear, initials } from '@/lib/utils'
 import { useApp } from '@/context/AppContext'
 import { useNarration } from '@/context/NarrationContext'
@@ -146,6 +147,7 @@ function CardBody({
   const prefersReducedMotion = usePrefersReducedMotion()
   const isFeatured = variant === 'featured'
   const isCompact = variant === 'compact'
+  const display = phil ? localizePhilosopher(phil, locale) : undefined
 
   return (
     <>
@@ -178,19 +180,19 @@ function CardBody({
             aria-hidden="true"
             className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-accent to-accent-2 text-xs font-bold text-[#0a0a12]"
           >
-            {phil ? initials(phil.name) : '?'}
+            {display ? initials(display.name) : '?'}
           </span>
-          <span className="font-display text-base text-accent">{phil?.name ?? t('card.anon')}</span>
+          <span className="font-display text-base text-accent">{display?.name ?? t('card.anon')}</span>
         </div>
 
         {/* School / era / years chips */}
         <div className={cn('flex flex-wrap gap-2', isFeatured && 'justify-center')}>
-          {phil?.school && <MetaChip icon={Landmark} label={phil.school} />}
-          {phil?.era && <MetaChip icon={Calendar} label={phil.era} />}
+          {display?.school && <MetaChip icon={Landmark} label={display.school} />}
+          {display?.era && <MetaChip icon={Calendar} label={display.era} />}
           {phil && (
             <MetaChip
               icon={Clock}
-              label={`${formatYear(phil.birthYear)}–${formatYear(phil.deathYear)}`}
+              label={`${formatYear(phil.birthYear, locale)}–${formatYear(phil.deathYear, locale)}`}
             />
           )}
         </div>
@@ -208,7 +210,7 @@ function CardBody({
               key={tag}
               className="rounded-full border border-line-soft bg-glass px-2.5 py-0.5 text-xs text-muted transition-colors hover:border-line hover:text-accent"
             >
-              #{tag}
+              #{t(`tag.${tag}`)}
             </span>
           ))}
         </div>
@@ -455,7 +457,8 @@ function QuoteCard({
   const [copied, setCopied] = useState(false)
   const [shared, setShared] = useState(false)
 
-  const attribution = () => `"${getQuoteText(quote, locale)}" — ${phil?.name ?? t('card.anon')}`
+  const attribution = () =>
+    `"${getQuoteText(quote, locale)}" — ${phil ? localizePhilosopher(phil, locale).name : t('card.anon')}`
 
   const copyToClipboard = async () => {
     try {

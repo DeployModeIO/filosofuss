@@ -112,13 +112,6 @@ export const quotesBatch2: Quote[] = [
     source: 'Tratado político',
   },
   {
-    id: 'q-spinoza-8',
-    text: 'El hombre libre en nada piensa menos que en la muerte, y su sabiduría es una meditación sobre la vida.',
-    philosopherId: 'spinoza',
-    tags: ['libertad', 'muerte', 'vida'],
-    source: 'Ética',
-  },
-  {
     id: 'q-spinoza-9',
     text: 'El deseo es la esencia misma del hombre, en cuanto se concibe que por alguna afección cualquiera está determinado a hacer algo.',
     philosopherId: 'spinoza',
@@ -272,13 +265,6 @@ export const quotesBatch2: Quote[] = [
     source: 'Tratado de la naturaleza humana',
   },
   {
-    id: 'q-hume-8',
-    text: 'Nada es más libre que la imaginación del hombre.',
-    philosopherId: 'hume',
-    tags: ['mente', 'libertad'],
-    source: 'Tratado de la naturaleza humana',
-  },
-  {
     id: 'q-hume-9',
     text: 'La virtud personal consiste casi por entero en aquellas cualidades del espíritu que son útiles o agradables a uno mismo o a los demás.',
     philosopherId: 'hume',
@@ -416,13 +402,6 @@ export const quotesBatch2: Quote[] = [
     philosopherId: 'schopenhauer',
     tags: ['felicidad', 'deseo'],
     source: 'Parerga y paralipómena',
-  },
-  {
-    id: 'q-schopenhauer-9',
-    text: 'La soledad es la suerte de todos los espíritus excelentes.',
-    philosopherId: 'schopenhauer',
-    tags: ['sabiduría', 'existencia'],
-    source: 'El mundo como voluntad y representación',
   },
   {
     id: 'q-schopenhauer-10',

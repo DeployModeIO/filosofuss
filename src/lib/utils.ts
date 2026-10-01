@@ -75,14 +75,19 @@ export function clamp(n: number, min: number, max: number): number {
 }
 
 /**
- * Formatea un año para mostrar: negativos como "a. C.", null como "—".
+ * Formatea un año para mostrar: negativos como "a. C." (o "BC" en inglés),
+ * null como "—".
  * @example formatYear(-470) → "470 a. C."
+ * @example formatYear(-470, "en") → "470 BC"
  * @example formatYear(1844) → "1844"
  * @example formatYear(null) → "—"
  */
-export function formatYear(year: number | null): string {
+export function formatYear(
+  year: number | null,
+  locale: "es" | "en" = "es",
+): string {
   if (year === null) return "—";
-  if (year < 0) return `${Math.abs(year)} a. C.`;
+  if (year < 0) return `${Math.abs(year)} ${locale === "en" ? "BC" : "a. C."}`;
   return String(year);
 }
 

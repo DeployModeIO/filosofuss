@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { m } from 'framer-motion'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { BookOpen, Calendar, MapPin, X } from 'lucide-react'
-import { philosophers } from '@/data/philosophers'
+import { localizePhilosopher, philosophers } from '@/data/philosophers'
 import { getQuotesByPhilosopher } from '@/data/quotes'
 import type { Philosopher, Quote } from '@/types'
 import { cn, formatYear, hashCode } from '@/lib/utils'
@@ -38,8 +38,11 @@ function gradientFor(id: string): string {
 
 export default function PhilosopherWall() {
   const reduceMotion = usePrefersReducedMotion()
-  const { t } = useApp()
+  const { t, locale } = useApp()
   const [selected, setSelected] = useState<Philosopher | null>(null)
+  const selectedDisplay = selected
+    ? localizePhilosopher(selected, locale)
+    : undefined
 
   // Mapa id → citas precomputado una sola vez (Task B6), en lugar de filtrar
   // el corpus por cada filósofo en cada render.
@@ -84,6 +87,7 @@ export default function PhilosopherWall() {
         >
           {philosophers.map((p) => {
             const count = quotesByPhilosopher.get(p.id)?.length ?? 0
+            const display = localizePhilosopher(p, locale)
             return (
               <button
                 key={p.id}
@@ -97,14 +101,14 @@ export default function PhilosopherWall() {
                     gradientFor(p.id),
                   )}
                 >
-                  {initials(p.name)}
+                  {initials(display.name)}
                 </span>
                 <span className="flex flex-col gap-1">
                   <span className="font-display text-base text-content sm:text-lg">
-                    {p.name}
+                    {display.name}
                   </span>
                   <span className="text-xs text-muted">
-                    {p.era} · {p.school}
+                    {display.era} · {display.school}
                   </span>
                 </span>
                 <span className="text-xs font-medium text-accent">
@@ -140,33 +144,36 @@ export default function PhilosopherWall() {
                   gradientFor(selected.id),
                 )}
               >
-                {initials(selected.name)}
+                {initials(selectedDisplay?.name ?? selected.name)}
               </span>
               <div className="flex flex-col gap-2">
                 <h3
                   id="philosopher-sheet-title"
                   className="font-display text-2xl text-content sm:text-3xl"
                 >
-                  {selected.fullName}
+                  {selectedDisplay?.fullName ?? selected.fullName}
                 </h3>
                 <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm text-muted sm:justify-start">
                   <span className="inline-flex items-center gap-1.5">
                     <Calendar className="h-4 w-4 text-accent" />
-                    {formatYear(selected.birthYear)} –{' '}
-                    {formatYear(selected.deathYear)}
+                    {formatYear(selected.birthYear, locale)} –{' '}
+                    {formatYear(selected.deathYear, locale)}
                   </span>
                   <span className="inline-flex items-center gap-1.5">
                     <MapPin className="h-4 w-4 text-accent" />
-                    {selected.nationality}
+                    {selectedDisplay?.nationality ?? selected.nationality}
                   </span>
                 </div>
                 <p className="text-sm text-accent">
-                  {selected.era} · {selected.school}
+                  {selectedDisplay?.era ?? selected.era} ·{' '}
+                  {selectedDisplay?.school ?? selected.school}
                 </p>
               </div>
             </div>
 
-            <p className="mt-6 leading-relaxed text-muted">{selected.bio}</p>
+            <p className="mt-6 leading-relaxed text-muted">
+              {selectedDisplay?.bio ?? selected.bio}
+            </p>
 
             <div className="mt-8 flex flex-col gap-3">
               <h4 className="inline-flex items-center gap-2 font-display text-lg text-content">
