@@ -1,6 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m } from 'framer-motion'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
+import { spring } from '@/lib/variants'
+import { announce } from '@/components/ui/StatusAnnouncer'
+import Visualizer, { CssEqualizer } from '@/components/ui/Visualizer'
+import { getAnalyser, resumeAudioAnalyser } from '@/audio/analyser'
 import {
   ListMusic,
   Pause,
@@ -11,15 +16,11 @@ import {
   VolumeX,
   X,
 } from 'lucide-react'
-import { useAudio } from '@/context/AudioContext'
+import { useAudio, useAudioProgress } from '@/context/AudioContext'
 import { useApp } from '@/context/AppContext'
 import { tracks } from '@/data/tracks'
 import { cn } from '@/lib/utils'
-
-const reduceMotion =
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
+import { useFocusTrap } from '@/components/ui/Dialog'
 
 function formatTime(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds <= 0) return '0:00'
@@ -28,55 +29,43 @@ function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
-function Equalizer() {
-  return (
-    <span className="flex h-4 items-end gap-[2px]" aria-hidden="true">
-      {[0, 1, 2, 3].map((i) =>
-        reduceMotion ? (
-          <span key={i} className="h-3 w-[2px] rounded-full bg-accent" />
-        ) : (
-          <motion.span
-            key={i}
-            className="h-4 w-[2px] origin-bottom rounded-full bg-accent"
-            animate={{ scaleY: [0.25, 1, 0.5, 0.85, 0.25] }}
-            transition={{
-              duration: 0.9,
-              repeat: Infinity,
-              ease: 'easeInOut',
-              delay: i * 0.12,
-            }}
-          />
-        ),
-      )}
-    </span>
-  )
-}
-
 function IconButton({
   label,
   onClick,
   className,
   children,
+  hoverScale = false,
+  expanded,
+  controls,
 }: {
   label: string
   onClick: () => void
   className: string
   children: ReactNode
+  hoverScale?: boolean
+  expanded?: boolean
+  controls?: string
 }) {
+  const reduceMotion = usePrefersReducedMotion()
   return (
-    <button
+    <m.button
       type="button"
       onClick={onClick}
       aria-label={label}
       title={label}
+      aria-expanded={expanded}
+      aria-controls={controls}
+      whileHover={reduceMotion || !hoverScale ? {} : { scale: 1.05, transition: spring.press }}
+      whileTap={reduceMotion ? {} : { scale: 0.94, transition: spring.press }}
       className={className}
     >
       {children}
-    </button>
+    </m.button>
   )
 }
 
 export default function AudioPlayer() {
+  const reduceMotion = usePrefersReducedMotion()
   const {
     isPlaying,
     currentTrack,
@@ -84,7 +73,8 @@ export default function AudioPlayer() {
     volume,
     isMuted,
     duration,
-    currentTime,
+    error,
+    audioEl,
     togglePlay,
     next,
     prev,
@@ -94,19 +84,69 @@ export default function AudioPlayer() {
   } = useAudio()
   const { t } = useApp()
   const [expanded, setExpanded] = useState(false)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const panelId = useId()
+
+  // El panel expandido atrapa el foco, se cierra con Escape y devuelve el foco
+  // al botón que lo abrió (Task E1 / M9: diálogo real, no un `region` suelto).
+  useFocusTrap({
+    containerRef: panelRef,
+    active: expanded,
+    onEscape: () => setExpanded(false),
+  })
+  // Suscripción aislada: sólo este componente re-renderiza a ~4 Hz (Task B7).
+  const currentTime = useAudioProgress()
+
+  // Anuncia play/pausa en la región aria-live (Task C8). El ref evita anunciar
+  // en el montaje inicial y al cambiar de idioma (sólo cuando cambia el estado).
+  const prevPlayingRef = useRef(isPlaying)
+  useEffect(() => {
+    if (prevPlayingRef.current === isPlaying) return
+    prevPlayingRef.current = isPlaying
+    announce(isPlaying ? t('status.playing') : t('status.paused'))
+  }, [isPlaying, t])
+
+  // Anuncia el fallo de una pista (Review Focus #4).
+  const prevErrorRef = useRef(error)
+  useEffect(() => {
+    if (error && !prevErrorRef.current) announce(t('audio.error'))
+    prevErrorRef.current = error
+  }, [error, t])
+
+  // Crea el grafo de Web Audio (una sola vez) y reanuda el AudioContext dentro
+  // del gesto de usuario; si no, el elemento quedaría silenciado (§3.5).
+  const primeAudio = () => {
+    getAnalyser(audioEl)
+    resumeAudioAnalyser()
+  }
+
+  const handlePlayToggle = () => {
+    if (!isPlaying) primeAudio()
+    togglePlay()
+  }
 
   const progress =
     duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0
   const sliderValue = isMuted ? 0 : volume
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
+    <div className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] z-50 flex flex-col items-end gap-2">
+      {/* Error de pista: mensaje visible y reproducción detenida */}
+      {error && (
+        <p
+          role="alert"
+          className="glass-strong max-w-[15rem] rounded-2xl px-3 py-1.5 text-right text-2xs text-ember"
+        >
+          {t('audio.error')}
+        </p>
+      )}
+
       {/* Controles colapsados */}
       <div className="flex items-center gap-2">
-        {isPlaying && <Equalizer />}
+        {isPlaying && <Visualizer audioEl={audioEl} bars={4} className="h-4 w-6" />}
         <IconButton
           label={isPlaying ? t('audio.pause') : t('audio.play')}
-          onClick={togglePlay}
+          onClick={handlePlayToggle}
           className={cn(
             'glass-strong grid h-12 w-12 place-items-center rounded-full text-content transition-colors duration-300 hover:text-accent focus-visible:text-accent',
             isPlaying && 'animate-pulse-glow',
@@ -121,8 +161,10 @@ export default function AudioPlayer() {
         <IconButton
           label={expanded ? t('audio.close') : t('audio.open')}
           onClick={() => setExpanded((v) => !v)}
+          expanded={expanded}
+          controls={panelId}
           className={cn(
-            'glass-strong grid h-10 w-10 place-items-center rounded-full text-content transition-colors duration-300 hover:text-accent focus-visible:text-accent',
+            'glass-strong grid h-11 w-11 place-items-center rounded-full text-content transition-colors duration-300 hover:text-accent focus-visible:text-accent',
           )}
         >
           {expanded ? (
@@ -133,13 +175,17 @@ export default function AudioPlayer() {
         </IconButton>
       </div>
 
-      {/* Panel expandido */}
+      {/* Panel expandido: región etiquetada, NO un diálogo modal */}
       <AnimatePresence initial={false}>
         {expanded && (
-          <motion.div
+          <m.div
+            ref={panelRef}
             key="audio-panel"
+            id={panelId}
             role="dialog"
+            aria-modal="true"
             aria-label={t('audio.aria')}
+            tabIndex={-1}
             className="glass-strong overflow-hidden rounded-2xl p-4 shadow-card sm:w-80"
             initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8, height: 0 }}
             animate={
@@ -148,6 +194,11 @@ export default function AudioPlayer() {
             exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8, height: 0 }}
             transition={{ duration: reduceMotion ? 0 : 0.28, ease: 'easeInOut' }}
           >
+            {/* Visualizador de espectro (hasta 48 barras) */}
+            <div className="mb-3 h-10">
+              <Visualizer audioEl={audioEl} bars={48} className="h-10 w-full" />
+            </div>
+
             {/* Reproduciendo ahora */}
             <div className="mb-3 min-w-0">
               <p className="truncate font-display text-base text-accent">
@@ -164,7 +215,7 @@ export default function AudioPlayer() {
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <div className="mt-1 flex justify-between text-[10px] tabular-nums text-muted">
+              <div className="mt-1 flex justify-between text-2xs tabular-nums text-muted">
                 <span>{formatTime(currentTime)}</span>
                 <span>{formatTime(duration)}</span>
               </div>
@@ -175,14 +226,15 @@ export default function AudioPlayer() {
               <IconButton
                 label={t('audio.prev')}
                 onClick={prev}
-                className="grid h-9 w-9 place-items-center rounded-full text-muted transition-colors hover:text-accent"
+                className="grid h-11 w-11 place-items-center rounded-full text-muted transition-colors hover:text-accent"
               >
                 <SkipBack size={18} aria-hidden="true" />
               </IconButton>
-               <IconButton
+              <IconButton
+                hoverScale
                 label={isPlaying ? t('audio.pause') : t('audio.play')}
-                onClick={togglePlay}
-                className="grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-accent to-accent-2 text-[#0a0a12] shadow-glow transition-transform duration-200 hover:scale-105"
+                onClick={handlePlayToggle}
+                className="grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-accent to-accent-2 text-[#0a0a12] shadow-glow"
               >
                 {isPlaying ? (
                   <Pause size={20} aria-hidden="true" />
@@ -193,7 +245,7 @@ export default function AudioPlayer() {
               <IconButton
                 label={t('audio.next')}
                 onClick={next}
-                className="grid h-9 w-9 place-items-center rounded-full text-muted transition-colors hover:text-accent"
+                className="grid h-11 w-11 place-items-center rounded-full text-muted transition-colors hover:text-accent"
               >
                 <SkipForward size={18} aria-hidden="true" />
               </IconButton>
@@ -204,7 +256,7 @@ export default function AudioPlayer() {
               <IconButton
                 label={isMuted || volume === 0 ? t('audio.unmute') : t('audio.mute')}
                 onClick={toggleMute}
-                className="grid h-8 w-8 place-items-center rounded-full text-muted transition-colors hover:text-accent"
+                className="grid h-11 w-11 place-items-center rounded-full text-muted transition-colors hover:text-accent"
               >
                 {isMuted || volume === 0 ? (
                   <VolumeX size={16} aria-hidden="true" />
@@ -233,10 +285,13 @@ export default function AudioPlayer() {
                   <li key={track.id}>
                     <button
                       type="button"
-                      onClick={() => selectTrack(i)}
+                      onClick={() => {
+                        primeAudio()
+                        selectTrack(i)
+                      }}
                       aria-current={isCurrent ? 'true' : undefined}
                       className={cn(
-                        'flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors',
+                        'flex min-h-11 w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors',
                         isCurrent
                           ? 'bg-glass text-accent'
                           : 'text-muted hover:bg-glass hover:text-content',
@@ -244,9 +299,9 @@ export default function AudioPlayer() {
                     >
                       <span className="grid h-4 min-w-[16px] place-items-center">
                         {isCurrent && isPlaying ? (
-                          <Equalizer />
+                          <CssEqualizer />
                         ) : (
-                          <span className="text-[10px] tabular-nums">
+                          <span className="text-2xs tabular-nums">
                             {i + 1}
                           </span>
                         )}
@@ -257,7 +312,7 @@ export default function AudioPlayer() {
                 )
               })}
             </ul>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

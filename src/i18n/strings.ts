@@ -1,10 +1,9 @@
 // Sistema de internacionalización (i18n) de Filosofuss.
-// Solo traduce la INTERFAZ (no las citas, que permanecen en español).
-// Mantén las claves sincronizadas entre `es` y `en`.
+// Traduce la INTERFAZ y las etiquetas del vocabulario controlado de temas
+// (las citas usan su propia tabla ES/EN). Mantén las claves sincronizadas
+// entre `es` y `en`.
 
 export type Locale = 'es' | 'en'
-
-export const LOCALES: Locale[] = ['es', 'en']
 
 type Dict = Record<string, string>
 
@@ -20,8 +19,6 @@ const es: Dict = {
   'nav.home': 'Filosofuss — ir al inicio',
 
   // Tema
-  'theme.toLight': 'Activar modo claro',
-  'theme.toDark': 'Activar modo oscuro',
   'theme.dark': 'Modo oscuro',
   'theme.light': 'Modo claro',
   'theme.paper': 'Modo papel',
@@ -41,17 +38,16 @@ const es: Dict = {
   'audio.unmute': 'Activar sonido',
   'audio.volume': 'Volumen',
   'audio.aria': 'Reproductor de música ambiente',
+  'audio.error': 'No se pudo reproducir esta pista.',
 
   // Hero
   'hero.tagline': 'Sabiduría eterna',
   'hero.subtitle': 'Donde la filosofía cobra vida. Sumérgete en los pensamientos que dieron forma a la humanidad.',
   'hero.exploreQuotes': 'Explorar citas',
   'hero.meetPhilosophers': 'Conocer a los filósofos',
-  'hero.meta': 'Sabiduría eterna · {n} citas · {m} filósofos',
 
   // Home
   'home.featured.label': 'Una selección',
-  'home.featured.title': 'Citas destacadas',
   'home.featured.titleA': 'Citas ',
   'home.featured.titleB': 'destacadas',
   'home.featured.subtitle': 'Seis pensamientos escogidos al azar para despertar la reflexión.',
@@ -77,6 +73,15 @@ const es: Dict = {
   'card.anon': 'Anónimo',
   'card.shareTitle': 'Filosofuss',
   'card.shareLinkedIn': 'Compartir en LinkedIn',
+
+  // Anuncios aria-live (Task C8)
+  'status.copied': 'Copiado',
+  'status.shared': 'Texto compartido',
+  'status.favAdded': 'Añadido a favoritos',
+  'status.favRemoved': 'Quitado de favoritos',
+  'status.playing': 'Reproduciendo…',
+  'status.paused': 'En pausa',
+  'status.loading': 'Cargando…',
 
   // Explorar
   'browse.label': 'Catálogo',
@@ -110,7 +115,6 @@ const es: Dict = {
   'wall.subtitle': '{n} pensadores que modelaron la historia de las ideas. Pulsa cualquiera para conocer su obra.',
   'wall.quote': 'cita',
   'wall.quotes': 'citas',
-  'wall.sheetOf': 'Ficha de {name}',
   'wall.close': 'Cerrar',
   'wall.quotesCount': 'Citas ({n})',
 
@@ -123,6 +127,32 @@ const es: Dict = {
   'filter.tema': 'Tema',
   'filter.clear': 'Limpiar filtros',
   'filter.label': 'Filtros',
+
+  // Etiquetas de los temas (vocabulario controlado)
+  'tag.vida': 'vida',
+  'tag.muerte': 'muerte',
+  'tag.conocimiento': 'conocimiento',
+  'tag.sabiduría': 'sabiduría',
+  'tag.felicidad': 'felicidad',
+  'tag.virtud': 'virtud',
+  'tag.tiempo': 'tiempo',
+  'tag.amor': 'amor',
+  'tag.libertad': 'libertad',
+  'tag.verdad': 'verdad',
+  'tag.poder': 'poder',
+  'tag.dios': 'dios',
+  'tag.alma': 'alma',
+  'tag.naturaleza': 'naturaleza',
+  'tag.sufrimiento': 'sufrimiento',
+  'tag.ética': 'ética',
+  'tag.existencia': 'existencia',
+  'tag.razón': 'razón',
+  'tag.deseo': 'deseo',
+  'tag.cambio': 'cambio',
+  'tag.esperanza': 'esperanza',
+  'tag.miedo': 'miedo',
+  'tag.mente': 'mente',
+  'tag.justicia': 'justicia',
 
   // Footer
   'footer.quote': 'La sabiduría no se posee, se persigue.',
@@ -155,8 +185,6 @@ const en: Dict = {
   'nav.home': 'Filosofuss — go to home',
 
   // Theme
-  'theme.toLight': 'Switch to light mode',
-  'theme.toDark': 'Switch to dark mode',
   'theme.dark': 'Dark mode',
   'theme.light': 'Light mode',
   'theme.paper': 'Paper mode',
@@ -176,17 +204,16 @@ const en: Dict = {
   'audio.unmute': 'Unmute',
   'audio.volume': 'Volume',
   'audio.aria': 'Ambient music player',
+  'audio.error': 'This track could not be played.',
 
   // Hero
   'hero.tagline': 'Eternal wisdom',
   'hero.subtitle': 'Where philosophy comes alive. Immerse yourself in the thoughts that shaped humanity.',
   'hero.exploreQuotes': 'Explore quotes',
   'hero.meetPhilosophers': 'Meet the philosophers',
-  'hero.meta': 'Eternal wisdom · {n} quotes · {m} philosophers',
 
   // Home
   'home.featured.label': 'A selection',
-  'home.featured.title': 'Featured quotes',
   'home.featured.titleA': 'Featured ',
   'home.featured.titleB': 'quotes',
   'home.featured.subtitle': 'Six thoughts chosen at random to spark reflection.',
@@ -212,6 +239,15 @@ const en: Dict = {
   'card.anon': 'Anonymous',
   'card.shareTitle': 'Filosofuss',
   'card.shareLinkedIn': 'Share on LinkedIn',
+
+  // aria-live announcements (Task C8)
+  'status.copied': 'Copied',
+  'status.shared': 'Text shared',
+  'status.favAdded': 'Added to favorites',
+  'status.favRemoved': 'Removed from favorites',
+  'status.playing': 'Playing…',
+  'status.paused': 'Paused',
+  'status.loading': 'Loading…',
 
   // Explore
   'browse.label': 'Catalog',
@@ -245,7 +281,6 @@ const en: Dict = {
   'wall.subtitle': '{n} thinkers who shaped the history of ideas. Tap any to discover their work.',
   'wall.quote': 'quote',
   'wall.quotes': 'quotes',
-  'wall.sheetOf': 'Profile of {name}',
   'wall.close': 'Close',
   'wall.quotesCount': 'Quotes ({n})',
 
@@ -258,6 +293,32 @@ const en: Dict = {
   'filter.tema': 'Topic',
   'filter.clear': 'Clear filters',
   'filter.label': 'Filters',
+
+  // Topic labels (controlled vocabulary)
+  'tag.vida': 'life',
+  'tag.muerte': 'death',
+  'tag.conocimiento': 'knowledge',
+  'tag.sabiduría': 'wisdom',
+  'tag.felicidad': 'happiness',
+  'tag.virtud': 'virtue',
+  'tag.tiempo': 'time',
+  'tag.amor': 'love',
+  'tag.libertad': 'freedom',
+  'tag.verdad': 'truth',
+  'tag.poder': 'power',
+  'tag.dios': 'god',
+  'tag.alma': 'soul',
+  'tag.naturaleza': 'nature',
+  'tag.sufrimiento': 'suffering',
+  'tag.ética': 'ethics',
+  'tag.existencia': 'existence',
+  'tag.razón': 'reason',
+  'tag.deseo': 'desire',
+  'tag.cambio': 'change',
+  'tag.esperanza': 'hope',
+  'tag.miedo': 'fear',
+  'tag.mente': 'mind',
+  'tag.justicia': 'justice',
 
   // Footer
   'footer.quote': 'Wisdom is not possessed, it is pursued.',

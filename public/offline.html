@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#0A0A0F" />
+    <title>Sin conexión · Filosofuss</title>
+    <style>
+      :root {
+        --bg: #0a0a0f;
+        --surface: rgba(255, 255, 255, 0.04);
+        --line: rgba(201, 169, 106, 0.24);
+        --text: #ece8e1;
+        --muted: #a8a29a;
+        --accent: #c9a96a;
+        --accent-2: #b6764b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        min-height: 100svh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right))
+          max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+        background:
+          radial-gradient(120% 90% at 50% 0%, rgba(201, 169, 106, 0.09), transparent 60%),
+          var(--bg);
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        text-align: center;
+        -webkit-font-smoothing: antialiased;
+      }
+      main {
+        width: 100%;
+        max-width: 34rem;
+        padding: clamp(2rem, 6vw, 3.5rem);
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        background: var(--surface);
+        backdrop-filter: blur(12px);
+      }
+      .glyph {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 64px;
+        height: 64px;
+        margin-bottom: 1.25rem;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+        font-size: 2rem;
+        font-style: italic;
+        line-height: 1;
+        color: var(--accent);
+      }
+      h1 {
+        margin: 0 0 0.35rem;
+        font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+        font-size: clamp(2rem, 7vw, 2.75rem);
+        font-style: italic;
+        font-weight: 500;
+        line-height: 1.1;
+      }
+      .en {
+        margin: 0 0 1.5rem;
+        font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+        font-size: 1.15rem;
+        font-style: italic;
+        color: var(--muted);
+      }
+      p {
+        margin: 0 0 1.75rem;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+      a.retry {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-height: 44px;
+        padding: 0.75rem 1.5rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #0a0a12;
+        font-weight: 600;
+        text-decoration: none;
+        transition: transform 0.18s ease, filter 0.18s ease;
+      }
+      a.retry:hover {
+        filter: brightness(1.06);
+        transform: translateY(-1px);
+      }
+      .brand {
+        margin-top: 1.75rem;
+        font-size: 0.7rem;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        a.retry {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="glyph" aria-hidden="true">“</div>
+      <h1>Sin conexión</h1>
+      <p class="en">You are offline</p>
+      <p>
+        Comprueba tu conexión y vuelve a intentarlo.<br />
+        <span lang="en">Check your connection and try again.</span>
+      </p>
+      <a class="retry" href="./">Reintentar · Retry</a>
+      <p class="brand">Filosofuss</p>
+    </main>
+  </body>
+</html>

@@ -17,7 +17,7 @@ export default function Footer() {
   ]
 
   return (
-    <footer className="border-t border-line-soft bg-bg-2">
+    <footer className="border-t border-line-soft bg-bg-2 pb-[max(0px,env(safe-area-inset-bottom))]">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-4 py-12 text-center sm:px-6">
         <Logo size="md" />
 

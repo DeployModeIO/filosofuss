@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useApp } from '@/context/AppContext'
+import { useQuotes } from '@/context/QuotesContext'
 import { getQuoteById } from '@/data/quotes'
 
 /**
@@ -9,8 +10,10 @@ import { getQuoteById } from '@/data/quotes'
  */
 export default function QuoteDeepLink() {
   const { openZen } = useApp()
+  const { ready } = useQuotes()
 
   useEffect(() => {
+    if (!ready) return
     const params = new URLSearchParams(window.location.search)
     const id = params.get('cita')
     if (id && getQuoteById(id)) {
@@ -19,7 +22,7 @@ export default function QuoteDeepLink() {
       url.searchParams.delete('cita')
       window.history.replaceState({}, '', url.toString())
     }
-  }, [openZen])
+  }, [openZen, ready])
 
   return null
 }

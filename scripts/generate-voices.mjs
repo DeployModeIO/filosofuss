@@ -24,7 +24,7 @@
 //    node scripts/generate-voices.mjs --force      (regenera aunque existan)
 // ============================================================================
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync, statSync } from 'node:fs'
+import { readFileSync, writeFileSync, existsSync, mkdirSync, statSync, unlinkSync } from 'node:fs'
 import { readdirSync } from 'node:fs'
 import { join, dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -88,6 +88,11 @@ const PROJECT_ROOT = resolve(__dirname, '..')
 const DATA_DIR = join(PROJECT_ROOT, 'src', 'data')
 const AUDIO_DIR = join(PROJECT_ROOT, 'public', 'audio', 'voice', LANG)
 const MANIFEST_PATH = join(DATA_DIR, 'voiceManifest.ts')
+
+// Formato de audio final (AAC en contenedor MP4) y salida temporal de edge-tts
+// antes de la conversión con ffmpeg.
+const AUDIO_EXT = '.m4a'
+const TMP_MEDIA_EXT = '.mp3'
 
 // ----------------------------------------------------------------------------
 //  EXTRACCIÓN DE CITAS POR REGEX (sin importar TypeScript)
@@ -165,21 +170,57 @@ function printInstallInstructions() {
 }
 
 // ----------------------------------------------------------------------------
-//  GENERACIÓN DE UN MP3 PARA UNA CITA (vía CLI edge-tts)
+//  DETECCIÓN DE FFMPEG (convierte el MP3 temporal a AAC .m4a)
 // ----------------------------------------------------------------------------
-function generateOne({ id, text }, outPath, runner) {
+function detectFfmpeg() {
+  const res = spawnSync('ffmpeg', ['-version'], {
+    stdio: ['ignore', 'ignore', 'ignore'],
+  })
+  return res.error === undefined && res.status === 0
+}
+
+function printFfmpegInstructions() {
+  console.error('\nERROR: no se encontró `ffmpeg` en el PATH.\n')
+  console.error('Se necesita para convertir la salida temporal de edge-tts (.mp3)')
+  console.error('al formato final AAC .m4a (mono, 24 kbps).\n')
+  console.error('Instálalo:')
+  console.error('    Windows : winget install Gyan.FFmpeg')
+  console.error('    macOS   : brew install ffmpeg')
+  console.error('    Linux   : sudo apt install ffmpeg\n')
+}
+
+// ----------------------------------------------------------------------------
+//  GENERACIÓN DE UN .m4a PARA UNA CITA (edge-tts → MP3 temporal → ffmpeg → AAC)
+// ----------------------------------------------------------------------------
+function generateOne({ text }, outPath, runner) {
+  const tmpPath = outPath.replace(new RegExp(`\\${AUDIO_EXT}$`), TMP_MEDIA_EXT)
   return new Promise((resolveGen) => {
     const child = spawn(
       runner.cmd,
-      [...runner.baseArgs, '--voice', CFG.voice, '--rate', CFG.rate, '--pitch', CFG.pitch, '--text', text, '--write-media', outPath],
+      [...runner.baseArgs, '--voice', CFG.voice, '--rate', CFG.rate, '--pitch', CFG.pitch, '--text', text, '--write-media', tmpPath],
       { stdio: ['ignore', 'inherit', 'inherit'], shell: runner.shell },
     )
     child.on('error', (err) => resolveGen({ ok: false, error: err.message }))
     child.on('close', (code) => {
-      if (code === 0 && existsSync(outPath) && statSync(outPath).size > 0) {
+      if (code !== 0 || !existsSync(tmpPath) || statSync(tmpPath).size === 0) {
+        resolveGen({ ok: false, error: `edge-tts salió con código ${code}` })
+        return
+      }
+      // Convertir el MP3 temporal a AAC .m4a (mono, 24 kbps).
+      const ff = spawnSync(
+        'ffmpeg',
+        ['-y', '-i', tmpPath, '-c:a', 'aac', '-b:a', '24k', '-ac', '1', outPath],
+        { stdio: ['ignore', 'ignore', 'inherit'] },
+      )
+      try {
+        unlinkSync(tmpPath)
+      } catch {
+        /* el temporal ya no existe */
+      }
+      if (ff.status === 0 && existsSync(outPath) && statSync(outPath).size > 0) {
         resolveGen({ ok: true })
       } else {
-        resolveGen({ ok: false, error: `código de salida ${code}` })
+        resolveGen({ ok: false, error: `ffmpeg falló (código ${ff.status})` })
       }
     })
   })
@@ -199,8 +240,8 @@ function regenerateManifest() {
     const d = dirs[lang]
     if (!existsSync(d)) return []
     return readdirSync(d)
-      .filter((f) => f.endsWith('.mp3'))
-      .map((f) => f.replace(/\.mp3$/, ''))
+      .filter((f) => f.endsWith(AUDIO_EXT))
+      .map((f) => f.replace(new RegExp(`\\${AUDIO_EXT}$`), ''))
       .sort((a, b) => a.localeCompare(b))
   }
   const esIds = scan('es')
@@ -212,23 +253,23 @@ function regenerateManifest() {
 export const voiceLangs = ['es', 'en'] as const
 export type VoiceLang = (typeof voiceLangs)[number]
 
-/** Set de ids de cita que tienen MP3 de narración en español. */
+/** Set de ids de cita que tienen audio (.m4a) de narración en español. */
 export const narratedEsQuoteIds: ReadonlySet<string> = new Set<string>([
 ${setBlock(esIds)}
 ])
 
-/** Set de ids de cita que tienen MP3 de narración en inglés. */
+/** Set de ids de cita que tienen audio (.m4a) de narración en inglés. */
 export const narratedEnQuoteIds: ReadonlySet<string> = new Set<string>([
 ${setBlock(enIds)}
 ])
 
-/** Devuelve la ruta pública del MP3 de una cita en el idioma dado, o null. */
+/** Devuelve la ruta pública del audio (.m4a) de una cita en el idioma dado, o null. */
 export function getNarrationSrc(quoteId: string, lang: VoiceLang = 'es'): string | null {
   if (lang === 'es' && narratedEsQuoteIds.has(quoteId)) {
-    return \`/audio/voice/es/\${quoteId}.mp3\`
+    return \`/audio/voice/es/\${quoteId}\${AUDIO_EXT}\`
   }
   if (lang === 'en' && narratedEnQuoteIds.has(quoteId)) {
-    return \`/audio/voice/en/\${quoteId}.mp3\`
+    return \`/audio/voice/en/\${quoteId}\${AUDIO_EXT}\`
   }
   return null
 }
@@ -293,6 +334,12 @@ async function main() {
   }
   console.log(`edge-tts    : ${runner.cmd} ${runner.baseArgs.join(' ')}`)
 
+  console.log('Detectando ffmpeg...')
+  if (!detectFfmpeg()) {
+    printFfmpegInstructions()
+    process.exit(1)
+  }
+
   let allQuotes = loadQuotes()
   if (Number.isFinite(LIMIT)) allQuotes = allQuotes.slice(0, LIMIT)
 
@@ -305,7 +352,7 @@ async function main() {
   let failed = 0
 
   await runLimited(allQuotes, CONCURRENCY, async (q, i) => {
-    const outPath = join(AUDIO_DIR, `${q.id}.mp3`)
+    const outPath = join(AUDIO_DIR, `${q.id}${AUDIO_EXT}`)
     if (!FORCE && existsSync(outPath) && statSync(outPath).size > 0) {
       skipped++
       console.log(`[${i + 1}/${total}] ${q.id} skip`)

@@ -27,7 +27,7 @@ export default function Logo({ size = 'md', className }: LogoProps) {
       to="/"
       aria-label={t('nav.home')}
       className={cn(
-        'group inline-flex select-none items-center gap-2 font-logo tracking-[0.18em]',
+        'group inline-flex select-none items-center gap-2 font-logo tracking-logo',
         className,
       )}
     >

@@ -5,14 +5,12 @@ import { useApp } from '@/context/AppContext'
 export interface SearchBarProps {
   query: string
   onQuery: (q: string) => void
-  placeholder?: string
   autoFocus?: boolean
 }
 
 export default function SearchBar({
   query,
   onQuery,
-  placeholder = 'Buscar citas, filósofos, temas…',
   autoFocus = false,
 }: SearchBarProps) {
   const { t } = useApp()
@@ -38,9 +36,9 @@ export default function SearchBar({
           type="button"
           onClick={() => onQuery('')}
           aria-label={t('search.clear')}
-          className="shrink-0 rounded-full p-1 text-muted transition-colors hover:text-content"
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-muted transition-colors hover:text-content"
         >
-          <X className="h-4 w-4" />
+          <X className="h-4 w-4" aria-hidden="true" />
         </button>
       )}
     </div>

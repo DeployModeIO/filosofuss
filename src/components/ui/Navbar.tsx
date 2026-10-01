@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { useEffect, useId, useRef, useState } from 'react'
+import { AnimatePresence, m } from 'framer-motion'
 import { Heart, Menu, X } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useApp } from '@/context/AppContext'
+import { useFocusTrap } from './Dialog'
 import Logo from './Logo'
 import ThemeToggle from './ThemeToggle'
 import LanguageToggle from './LanguageToggle'
@@ -47,7 +48,7 @@ function DesktopLink({ item, favoritesCount }: { item: NavItem; favoritesCount: 
           {isFav && favoritesCount > 0 && (
             <span
               aria-label={t('nav.favoritesCount', { n: favoritesCount })}
-              className="grid h-4 min-w-[1rem] place-items-center rounded-full bg-accent px-1 text-[10px] font-bold leading-none text-bg"
+              className="grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-2xs font-bold leading-none text-bg"
             >
               {favoritesCount}
             </span>
@@ -98,7 +99,7 @@ function MobileLink({
             />
           )}
           {isFav && favoritesCount > 0 && (
-            <span className="ml-auto grid h-5 min-w-[1.25rem] place-items-center rounded-full bg-accent px-1.5 text-[11px] font-bold leading-none text-bg">
+            <span className="ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1.5 text-2xs font-bold leading-none text-bg">
               {favoritesCount}
             </span>
           )}
@@ -112,6 +113,14 @@ export default function Navbar() {
   const { favoritesCount, t } = useApp()
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const menuId = useId()
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  useFocusTrap({
+    containerRef: panelRef,
+    active: open,
+    onEscape: () => setOpen(false),
+  })
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
@@ -123,11 +132,11 @@ export default function Navbar() {
   return (
     <header
       className={cn(
-        'sticky top-0 z-50 border-b border-line-soft transition-all duration-300',
+        'sticky top-0 z-50 border-b border-line-soft pt-[max(0px,env(safe-area-inset-top))] transition-all duration-300',
         scrolled ? 'glass-strong shadow-card' : 'glass',
       )}
     >
-      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-6">
         <Logo size="md" />
 
         <div className="hidden items-center gap-8 md:flex">
@@ -136,18 +145,22 @@ export default function Navbar() {
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <LanguageToggle />
-          <ThemeToggle />
+          {/* El selector de tema ocupa demasiado en móvil; se mueve al menú. */}
+          <div className="hidden md:flex">
+            <ThemeToggle />
+          </div>
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
             aria-label={open ? t('nav.closeMenu') : t('nav.openMenu')}
             aria-expanded={open}
-            className="glass-strong grid h-10 w-10 place-items-center rounded-full text-content transition-colors hover:text-accent md:hidden"
+            aria-controls={menuId}
+            className="glass-strong grid h-11 w-11 place-items-center rounded-full text-content transition-colors hover:text-accent md:hidden"
           >
             <AnimatePresence mode="wait" initial={false}>
-              <motion.span
+              <m.span
                 key={open ? 'x' : 'menu'}
                 initial={{ opacity: 0, rotate: -90, scale: 0.5 }}
                 animate={{ opacity: 1, rotate: 0, scale: 1 }}
@@ -160,7 +173,7 @@ export default function Navbar() {
                 ) : (
                   <Menu size={18} aria-hidden="true" />
                 )}
-              </motion.span>
+              </m.span>
             </AnimatePresence>
           </button>
         </div>
@@ -168,14 +181,16 @@ export default function Navbar() {
 
       <AnimatePresence>
         {open && (
-          <motion.div
+          <m.div
+            ref={panelRef}
+            id={menuId}
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.25, ease: 'easeInOut' }}
             className="overflow-hidden border-t border-line-soft md:hidden"
           >
-            <div className="glass-strong flex flex-col gap-1 px-3 py-3">
+            <nav className="glass-strong flex flex-col gap-1 px-3 py-3">
               {NAV_ITEMS.map((item) => (
                 <MobileLink
                   key={item.to}
@@ -184,8 +199,16 @@ export default function Navbar() {
                   onNavigate={() => setOpen(false)}
                 />
               ))}
-            </div>
-          </motion.div>
+
+              {/* Selector de tema (sólo móvil; en escritorio vive en la barra). */}
+              <div className="mt-1 flex items-center justify-between gap-3 border-t border-line-soft px-2 pt-3">
+                <span className="text-xs font-semibold uppercase tracking-eyebrow text-muted">
+                  {t('theme.label')}
+                </span>
+                <ThemeToggle layoutKey="theme-pill-mobile" />
+              </div>
+            </nav>
+          </m.div>
         )}
       </AnimatePresence>
     </header>

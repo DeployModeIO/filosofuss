@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react'
 import type { ReactNode } from 'react'
-import { getNarrationSrc, type VoiceLang, voiceLangs } from '@/data/voiceManifest'
+import type { VoiceLang } from '@/data/voiceManifest'
 import { getQuoteById, getQuoteText } from '@/data/quotes'
 import { useLocalStorage } from '@/lib/storage'
 import { useAudio } from '@/context/AudioContext'
@@ -34,6 +34,28 @@ const NarrationContext = createContext<NarrationContextValue | undefined>(undefi
 
 const LANG_KEY = 'filosofuss:narration-lang'
 
+// Guarda de forma: un idioma persistido no soportado degrada a 'es'.
+const isVoiceLang = (v: unknown): v is VoiceLang => v === 'es' || v === 'en'
+
+/** Idiomas de narración soportados (mismo contrato público que `voiceLangs`). */
+const VOICE_LANGS: readonly VoiceLang[] = ['es', 'en'] as const
+
+type VoiceManifestModule = typeof import('@/data/voiceManifest')
+
+/**
+ * El manifiesto de voz (1014 ids `q-*`) se importa de forma diferida para
+ * mantenerlo fuera del bundle inicial (Task B3). Se precarga al montar el
+ * provider, de modo que al pulsar «escuchar» ya está disponible.
+ */
+let voiceManifestPromise: Promise<VoiceManifestModule> | null = null
+
+function loadVoiceManifest(): Promise<VoiceManifestModule> {
+  if (voiceManifestPromise === null) {
+    voiceManifestPromise = import('@/data/voiceManifest')
+  }
+  return voiceManifestPromise
+}
+
 export function NarrationProvider({ children }: { children: ReactNode }) {
   // Una sola instancia de <audio>, creada perezosamente (sólo en cliente).
   const audioRef = useRef<HTMLAudioElement | null>(null)
@@ -41,9 +63,21 @@ export function NarrationProvider({ children }: { children: ReactNode }) {
     audioRef.current = new Audio()
   }
 
-  const [lang, setLang] = useLocalStorage<VoiceLang>(LANG_KEY, 'es')
+  const [lang, setLang] = useLocalStorage<VoiceLang>(LANG_KEY, 'es', isVoiceLang)
   const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null)
   const [isNarrating, setIsNarrating] = useState(false)
+  const voiceManifestRef = useRef<VoiceManifestModule | null>(null)
+
+  // Precarga del manifiesto de voz (fuera del bundle inicial) al montar.
+  useEffect(() => {
+    let cancelled = false
+    loadVoiceManifest().then((m) => {
+      if (!cancelled) voiceManifestRef.current = m
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const { pause, isPlaying } = useAudio()
   const { locale } = useApp()
@@ -62,7 +96,7 @@ export function NarrationProvider({ children }: { children: ReactNode }) {
 
   const isSupported =
     typeof window !== 'undefined' &&
-    ('speechSynthesis' in window || voiceLangs.length > 0)
+    ('speechSynthesis' in window || VOICE_LANGS.length > 0)
 
   // Mantiene los refs sincronizados con el estado.
   useEffect(() => {
@@ -160,7 +194,7 @@ export function NarrationProvider({ children }: { children: ReactNode }) {
       }
 
       // 3. Intentar reproducir el MP3.
-      const src = getNarrationSrc(quoteId, lang)
+      const src = voiceManifestRef.current?.getNarrationSrc(quoteId, lang) ?? null
       if (src !== null) {
         const audio = audioRef.current
         if (!audio) return

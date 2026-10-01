@@ -36,6 +36,14 @@ const prefersLight =
 
 const DEFAULT_THEME: Theme = prefersLight ? 'light' : 'dark'
 
+// Guardas de forma para los valores persistidos (COD-04): un localStorage
+// corrupto o de otra versión degrada al valor por defecto en lugar de violar
+// el tipo en runtime.
+const isTheme = (v: unknown): v is Theme => v === 'dark' || v === 'light' || v === 'paper'
+const isStringArray = (v: unknown): v is string[] =>
+  Array.isArray(v) && v.every((x) => typeof x === 'string')
+const isLocale = (v: unknown): v is Locale => v === 'es' || v === 'en'
+
 export function AppProvider({ children }: { children: ReactNode }) {
   // NOTE: useLocalStorage's setter is typed (value: T) => void and does NOT
   // accept functional updaters, so all actions compute the next value from the
@@ -43,14 +51,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useLocalStorage<Theme>(
     'filosofuss:theme',
     DEFAULT_THEME,
+    isTheme,
   )
   const [favorites, setFavorites] = useLocalStorage<string[]>(
     'filosofuss:favorites',
     [],
+    isStringArray,
   )
   const [locale, setLocale] = useLocalStorage<Locale>(
     'filosofuss:locale',
     'es',
+    isLocale,
   )
   const [zenQuoteId, setZenQuoteId] = useState<string | null>(null)
 

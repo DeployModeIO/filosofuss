@@ -1,23 +1,22 @@
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { Quote as QuoteIcon, Volume2, Square } from 'lucide-react'
 import { useQuoteOfDay } from '@/hooks/useQuoteOfDay'
 import { formatYear } from '@/lib/utils'
 import { useNarration } from '@/context/NarrationContext'
 import { useApp } from '@/context/AppContext'
 import { getQuoteSource, getQuoteText } from '@/data/quotes'
+import { localizePhilosopher } from '@/data/philosophers'
 import AnimatedQuote from '@/components/quotes/AnimatedQuote'
 
-const prefersReducedMotion =
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
 export default function QuoteOfDay() {
+  const prefersReducedMotion = usePrefersReducedMotion()
   const { quote, philosopher } = useQuoteOfDay()
   const { activeQuoteId, isNarrating, toggle } = useNarration()
   const { t, locale } = useApp()
   const narratingThis = isNarrating && activeQuoteId === quote.id
+  const display = philosopher ? localizePhilosopher(philosopher, locale) : undefined
 
   return (
     <section className="relative mx-auto flex w-full max-w-3xl flex-col items-center overflow-hidden px-4 py-16 text-center sm:py-24">
@@ -42,9 +41,9 @@ export default function QuoteOfDay() {
       />
 
       {/* Label */}
-      <motion.div
+      <m.div
         initial={prefersReducedMotion ? false : { opacity: 0, y: -8 }}
-        animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+        animate={prefersReducedMotion ? false : { opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="relative z-10 mb-8 flex items-center gap-3"
       >
@@ -52,14 +51,14 @@ export default function QuoteOfDay() {
           aria-hidden="true"
           className="h-px w-8 bg-gradient-to-r from-transparent to-accent"
         />
-        <span className="font-sans text-xs font-semibold uppercase tracking-[0.3em] text-accent">
+        <span className="font-sans text-xs font-semibold uppercase tracking-eyebrow text-accent">
           {t('qod.label')}
         </span>
         <span
           aria-hidden="true"
           className="h-px w-8 bg-gradient-to-l from-transparent to-accent"
         />
-      </motion.div>
+      </m.div>
 
       {/* Quote text — word stagger reveal */}
       <AnimatedQuote
@@ -68,28 +67,28 @@ export default function QuoteOfDay() {
       />
 
       {/* Attribution */}
-      <motion.div
+      <m.div
         initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
-        animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+        animate={prefersReducedMotion ? false : { opacity: 1, y: 0 }}
         transition={{ delay: 0.6, duration: 0.5 }}
         className="relative z-10 mt-8 flex flex-col items-center gap-1"
       >
           <span className="font-display text-xl text-accent">
-           {philosopher?.name ?? t('qod.anon')}
+           {display?.name ?? t('qod.anon')}
           </span>
-        {philosopher && (
+        {display && philosopher && (
           <span className="text-sm text-muted">
-            {philosopher.era} · {philosopher.school} · {formatYear(philosopher.birthYear)}–
-            {formatYear(philosopher.deathYear)}
+            {display.era} · {display.school} · {formatYear(philosopher.birthYear, locale)}–
+            {formatYear(philosopher.deathYear, locale)}
           </span>
         )}
         {quote.source && <span className="text-xs italic text-muted">— {getQuoteSource(quote, locale)}</span>}
-      </motion.div>
+      </m.div>
 
       {/* CTA */}
-      <motion.div
+      <m.div
         initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
-        animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+        animate={prefersReducedMotion ? false : { opacity: 1, y: 0 }}
         transition={{ delay: 0.8, duration: 0.5 }}
         className="relative z-10 mt-10"
       >
@@ -107,7 +106,7 @@ export default function QuoteOfDay() {
             {narratingThis ? t('qod.stop') : t('qod.listenShort')}
           </button>
         </div>
-      </motion.div>
+      </m.div>
     </section>
   )
 }

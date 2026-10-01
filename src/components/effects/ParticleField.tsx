@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
 interface Particle {
   x: number
@@ -13,9 +14,11 @@ interface Particle {
 }
 
 const COLORS = ['rgba(201,169,106,', 'rgba(176,113,63,', 'rgba(122,46,77,']
+const FALLBACK_COLOR = COLORS[0] ?? 'rgba(201,169,106,'
 
 function createParticles(width: number, height: number): Particle[] {
-  const count = Math.min(70, Math.max(22, Math.floor(width / 24)))
+  // Cap duro de 40 partículas (Task C5 / P-14), antes hasta 70.
+  const count = Math.min(40, Math.max(16, Math.floor(width / 32)))
   const particles: Particle[] = []
   for (let i = 0; i < count; i++) {
     particles.push({
@@ -27,13 +30,14 @@ function createParticles(width: number, height: number): Particle[] {
       swaySpeed: Math.random() * 0.6 + 0.3,
       phase: Math.random() * Math.PI * 2,
       alpha: Math.random() * 0.5 + 0.2,
-      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      color: COLORS[Math.floor(Math.random() * COLORS.length)] ?? FALLBACK_COLOR,
     })
   }
   return particles
 }
 
 export default function ParticleField() {
+  const reduceMotion = usePrefersReducedMotion()
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -41,10 +45,6 @@ export default function ParticleField() {
     if (!canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
-
-    const reduceMotion =
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2)
     let width = window.innerWidth
@@ -131,7 +131,7 @@ export default function ParticleField() {
       window.removeEventListener('resize', onResize)
       document.removeEventListener('visibilitychange', onVisibility)
     }
-  }, [])
+  }, [reduceMotion])
 
   return (
     <canvas

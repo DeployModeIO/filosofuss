@@ -68,20 +68,6 @@ export const quotesBatch3: Quote[] = [
     source: 'Manifiesto del Partido Comunista',
   },
   {
-    id: 'q-marx-9',
-    text: 'La historia de todas las sociedades hasta nuestros días es la historia de la lucha de clases.',
-    philosopherId: 'marx',
-    tags: ['poder', 'justicia', 'cambio'],
-    source: 'Manifiesto del Partido Comunista',
-  },
-  {
-    id: 'q-marx-10',
-    text: 'Proletarios de todos los países, ¡uníos!',
-    philosopherId: 'marx',
-    tags: ['poder', 'justicia', 'esperanza'],
-    source: 'Manifiesto del Partido Comunista',
-  },
-  {
     id: 'q-marx-11',
     text: 'El capital viene al mundo goteando sangre y lodo por todos los poros, de los pies a la cabeza.',
     philosopherId: 'marx',
@@ -104,13 +90,6 @@ export const quotesBatch3: Quote[] = [
   },
 
   // ── Nietzsche ──
-  {
-    id: 'q-nietzsche-10',
-    text: 'Sin música, la vida sería un error.',
-    philosopherId: 'nietzsche',
-    tags: ['vida', 'felicidad', 'alma'],
-    source: 'Crepúsculo de los ídolos',
-  },
   {
     id: 'q-nietzsche-11',
     text: 'Yo solo podría creer en un Dios que supiera bailar.',
@@ -218,13 +197,6 @@ export const quotesBatch3: Quote[] = [
     text: 'La ética y la estética son una sola cosa.',
     philosopherId: 'wittgenstein',
     tags: ['ética', 'virtud'],
-    source: 'Tractatus Logico-Philosophicus',
-  },
-  {
-    id: 'q-wittgenstein-9',
-    text: 'El mundo del feliz es distinto del mundo del infeliz.',
-    philosopherId: 'wittgenstein',
-    tags: ['felicidad', 'mente', 'existencia'],
     source: 'Tractatus Logico-Philosophicus',
   },
   {

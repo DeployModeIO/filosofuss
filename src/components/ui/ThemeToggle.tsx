@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { Moon, Sun, FileText } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useApp } from '@/context/AppContext'
@@ -16,8 +17,14 @@ const OPTIONS: ThemeOption[] = [
   { value: 'paper', icon: FileText, key: 'theme.paper' },
 ]
 
-export default function ThemeToggle() {
+export interface ThemeToggleProps {
+  /** `layoutId` único para que dos instancias no compartan la píldora deslizante. */
+  layoutKey?: string
+}
+
+export default function ThemeToggle({ layoutKey = 'theme-pill' }: ThemeToggleProps) {
   const { theme, setTheme, t } = useApp()
+  const reduceMotion = usePrefersReducedMotion()
 
   return (
     <div
@@ -37,15 +44,18 @@ export default function ThemeToggle() {
             aria-label={t(option.key)}
             title={t(option.key)}
             onClick={() => setTheme(option.value)}
-            className="relative grid h-8 w-8 place-items-center rounded-full transition-colors duration-200 focus-visible:text-accent"
+            className="relative grid h-11 w-11 place-items-center rounded-full transition-colors duration-200 focus-visible:text-accent"
           >
-            {active && (
-              <motion.span
-                layoutId="theme-pill"
-                className="absolute inset-0 rounded-full bg-gradient-to-br from-accent to-accent-2 shadow-glow"
-                transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-              />
-            )}
+            {active &&
+              (reduceMotion ? (
+                <span className="absolute inset-0 rounded-full bg-gradient-to-br from-accent to-accent-2 shadow-glow" />
+              ) : (
+                <m.span
+                  layoutId={layoutKey}
+                  className="absolute inset-0 rounded-full bg-gradient-to-br from-accent to-accent-2 shadow-glow"
+                  transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                />
+              ))}
             <Icon
               size={16}
               aria-hidden="true"

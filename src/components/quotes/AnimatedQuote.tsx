@@ -1,23 +1,6 @@
-import { motion, type Variants } from 'framer-motion'
-
-const prefersReducedMotion =
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-const container: Variants = prefersReducedMotion
-  ? { hidden: {}, show: {} }
-  : {
-      hidden: {},
-      show: { transition: { staggerChildren: 0.04, delayChildren: 0.1 } },
-    }
-
-const word: Variants = prefersReducedMotion
-  ? { hidden: { opacity: 1, y: 0 }, show: { opacity: 1, y: 0 } }
-  : {
-      hidden: { opacity: 0, y: 12 },
-      show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
-    }
+import { m } from 'framer-motion'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
+import { heroReveal } from '@/lib/variants'
 
 export interface AnimatedQuoteProps {
   text: string
@@ -25,27 +8,23 @@ export interface AnimatedQuoteProps {
 }
 
 /**
- * Cita con revelado palabra a palabra (respetando prefers-reduced-motion).
- * Usada en el Hero y en la Cita del día para mantener una misma cadencia.
+ * Cita con revelado por máscara sobre el bloque completo (Task C5 / P-09).
+ * Antes se creaba un `<m.span>` por palabra; ahora es un único nodo con
+ * `heroReveal` (clip-path + y), lo que elimina cientos de nodos DOM por cita
+ * sin cambiar el resultado visual de forma perceptible.
  */
 export default function AnimatedQuote({ text, className }: AnimatedQuoteProps) {
-  const words = text.split(' ')
+  const reduceMotion = usePrefersReducedMotion()
+
   return (
-    <motion.blockquote
-      variants={container}
-      initial="hidden"
-      animate="show"
+    <m.blockquote
+      variants={heroReveal}
+      initial={reduceMotion ? false : 'hidden'}
+      animate={reduceMotion ? false : 'show'}
+      style={reduceMotion ? {} : { willChange: 'transform, opacity' }}
       className={className}
     >
-      {words.map((w, i) => (
-        <motion.span
-          key={`${i}-${w}`}
-          variants={word}
-          className="mr-[0.25em] inline-block"
-        >
-          {i === 0 ? `“${w}` : i === words.length - 1 ? `${w}”` : w}
-        </motion.span>
-      ))}
-    </motion.blockquote>
+      {`“${text}”`}
+    </m.blockquote>
   )
 }

@@ -3,31 +3,94 @@
 @tailwind utilities;
 
 /* ============================================================
+   FUENTES SELF-HOST (subset latin) — Task B8 (PERF-11 / SEC-25)
+   Archivos en public/fonts/. Declaración local sustituye a Google Fonts.
+   ============================================================ */
+@font-face {
+  font-family: 'Cinzel';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/cinzel-wordmark.woff2') format('woff2');
+  unicode-range: U+0046, U+0049, U+004C, U+004F, U+0053, U+0055, U+0066, U+0069, U+006C, U+006F,
+    U+0073, U+0075;
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/cormorant-garamond-normal.woff2') format('woff2');
+  unicode-range: U+0020-007E, U+00A1, U+00A9, U+00AB, U+00B7, U+00BB, U+00BF, U+00C1, U+00C9,
+    U+00CD, U+00E1, U+00E9, U+00ED, U+00F1, U+00F3, U+00F6, U+00F8, U+00FA, U+00FC, U+2013-2014,
+    U+2018-2019, U+201C-201D, U+2026;
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/cormorant-garamond-italic.woff2') format('woff2');
+  unicode-range: U+0020-007E, U+00A1, U+00A9, U+00AB, U+00B7, U+00BB, U+00BF, U+00C1, U+00C9,
+    U+00CD, U+00E1, U+00E9, U+00ED, U+00F1, U+00F3, U+00F6, U+00F8, U+00FA, U+00FC, U+2013-2014,
+    U+2018-2019, U+201C-201D, U+2026;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/inter.woff2') format('woff2');
+  unicode-range: U+0020-007E, U+00A1, U+00A9, U+00AB, U+00B7, U+00BB, U+00BF, U+00C1, U+00C9,
+    U+00CD, U+00E1, U+00E9, U+00ED, U+00F1, U+00F3, U+00F6, U+00F8, U+00FA, U+00FC, U+2013-2014,
+    U+2018-2019, U+201C-201D, U+2026;
+}
+
+/* ============================================================
    FILOSOFUSS — DESIGN SYSTEM
    Dark-first. Light theme overrides via html.light.
    ============================================================ */
 
 :root {
   /* Dark theme (default) */
+  --obsidian: #0a0a0f;
+  --slab: #14121a;
   --bg: #0a0a0f;
-  --bg-2: #12121a;
+  --bg-2: #14121a;
   --glass: rgba(255, 255, 255, 0.045);
   --glass-strong: rgba(255, 255, 255, 0.08);
   --border: rgba(201, 169, 106, 0.16);
   --border-soft: rgba(255, 255, 255, 0.08);
   --text: #ece8e1;
   --muted: #9a96aa;
+  --gold: #c9a96a;
+  --copper: #b0713f;
+  --ember: #c97a4a;
   --accent: #c9a96a; /* gold */
   --accent-2: #b0713f; /* copper */
-  --accent-3: #7a2e4d; /* wine */
+  --accent-3: #c97a4a; /* ember — replaces wine #7A2E4D */
+  --rose: #c98a6e;
+  --ink: #0a0a0f;
+  --on-accent: #0a0a0f;
   --glow: rgba(176, 113, 63, 0.45);
   --shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.7);
 
   /* Typography */
   --font-logo: 'Cinzel', serif;
-  --font-display: 'Playfair Display', serif;
+  --font-display: 'Cormorant Garamond', serif;
   --font-serif: 'Cormorant Garamond', serif;
   --font-sans: 'Inter', system-ui, sans-serif;
+
+  /* Type scale — interlínea, medida y tracking (§2.3) */
+  --leading-ui: 1.2;
+  --leading-body: 1.6;
+  --leading-quote: 1.35;
+  --measure-quote: 34ch;
+  --tracking-logo: 0.18em;
+  --tracking-eyebrow: 0.14em;
 }
 
 html.light {
@@ -38,11 +101,19 @@ html.light {
   --glass-strong: rgba(255, 255, 255, 0.98);
   --border: rgba(112, 88, 40, 0.22);
   --border-soft: rgba(0, 0, 0, 0.12);
+  --obsidian: #0a0a0f;
+  --slab: #f0ede8;
   --text: #181620;
   --muted: #6a6575;
-  --accent: #9c7633;
+  --gold: #7d5a1c;
+  --copper: #8a5a2f;
+  --ember: #9a4a2a;
+  --accent: #7d5a1c;
   --accent-2: #8a5a2f;
-  --accent-3: #8a3a3a;
+  --accent-3: #9a4a2a; /* ember — replaces wine */
+  --rose: #a8503a;
+  --ink: #0a0a0f;
+  --on-accent: #f4f1ea;
   --glow: rgba(138, 90, 47, 0.25);
   --shadow: 0 18px 50px -20px rgba(50, 40, 25, 0.2);
 }
@@ -55,11 +126,19 @@ html.paper {
   --glass-strong: rgba(255, 255, 255, 0.85);
   --border: rgba(120, 88, 40, 0.28);
   --border-soft: rgba(80, 60, 30, 0.16);
+  --obsidian: #0a0a0f;
+  --slab: #e8dcc3;
   --text: #2a251c;
-  --muted: #6b6355;
-  --accent: #8a6420;
+  --muted: #5b5343;
+  --gold: #7a561c;
+  --copper: #6b4a2a;
+  --ember: #8a3a2a;
+  --accent: #7a561c;
   --accent-2: #6b4a2a;
-  --accent-3: #7a3a2a;
+  --accent-3: #8a3a2a; /* ember — replaces wine */
+  --rose: #96402a;
+  --ink: #0a0a0f;
+  --on-accent: #f4f1ea;
   --glow: rgba(138, 100, 32, 0.22);
   --shadow: 0 18px 50px -20px rgba(60, 45, 20, 0.28);
 }
@@ -86,7 +165,7 @@ body {
 
 ::selection {
   background: var(--accent);
-  color: #0a0a12;
+  color: var(--on-accent);
 }
 
 /* ---------- Custom scrollbar ---------- */
@@ -143,7 +222,7 @@ body {
     padding: 0.7rem 1.5rem;
     font-weight: 600;
     line-height: 1;
-    color: #0a0a12;
+    color: var(--on-accent);
     background: linear-gradient(135deg, var(--accent), var(--accent-2));
     border: 1px solid transparent;
     cursor: pointer;
@@ -224,8 +303,7 @@ body {
     background: linear-gradient(
       135deg,
       var(--accent),
-      var(--accent-2),
-      var(--accent-3)
+      var(--accent-2)
     );
     background-size: 200% 200%;
     -webkit-background-clip: text;
@@ -237,8 +315,7 @@ body {
     background: linear-gradient(
       135deg,
       var(--accent),
-      var(--accent-2),
-      var(--accent-3)
+      var(--accent-2)
     );
     background-size: 200% 200%;
     -webkit-background-clip: text;
@@ -263,6 +340,9 @@ body {
 
 /* ============================================================
    KEYFRAMES
+   Única fuente: las animaciones usadas vía `animate-*` viven en
+   tailwind.config.js. Aquí queda solo `gradient-x`, referenciada
+   directamente por `.text-gradient-animated`.
    ============================================================ */
 @keyframes gradient-x {
   0%,
@@ -271,106 +351,6 @@ body {
   }
   50% {
     background-position: 100% 50%;
-  }
-}
-
-@keyframes gradient-y {
-  0%,
-  100% {
-    background-position: 50% 0%;
-  }
-  50% {
-    background-position: 50% 100%;
-  }
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-22px) rotate(2deg);
-  }
-}
-
-@keyframes float-slow {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-14px);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-@keyframes fade-up {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fade-in {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-@keyframes pulse-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 20px -10px var(--glow);
-  }
-  50% {
-    box-shadow: 0 0 45px -6px var(--glow);
-  }
-}
-
-@keyframes drift {
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-  50% {
-    transform: translate(20px, -30px);
-  }
-}
-
-@keyframes aurora {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-    filter: hue-rotate(0deg);
-  }
-  50% {
-    transform: translate(30px, -20px) scale(1.08);
-    filter: hue-rotate(20deg);
-  }
-}
-
-@keyframes spin-slow {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
   }
 }
 

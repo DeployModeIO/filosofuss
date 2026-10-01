@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from 'react'
 import type { ReactNode } from 'react'
 import { useLocalStorage } from '@/lib/storage'
@@ -19,7 +20,10 @@ export interface AudioContextValue {
   volume: number
   isMuted: boolean
   duration: number
-  currentTime: number
+  /** `true` after the current track failed to load. Cleared on the next play. */
+  error: boolean
+  /** The single `<audio>` element, exposed for the audio-reactive visualizer. */
+  audioEl: HTMLAudioElement | null
   play: () => void
   pause: () => void
   togglePlay: () => void
@@ -35,6 +39,46 @@ const AudioContext = createContext<AudioContextValue | undefined>(undefined)
 const VOLUME_KEY = 'filosofuss:volume'
 const INITIAL_VOLUME = 0.4
 
+// Guarda de forma: un volumen persistido corrupto degrada al valor por defecto.
+const isVolume = (v: unknown): v is number =>
+  typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 1
+
+/**
+ * Progreso de reproducción fuera del contexto raíz (Task B7 / PERF-10).
+ * `timeupdate` emite ~4 Hz; mantenerlo en el `value` del provider re-renderiza
+ * todo el árbol mientras suena. Con un store externo + `useSyncExternalStore`
+ * sólo se re-renderiza quien consume `useAudioProgress` (el AudioPlayer).
+ */
+let audioProgress = 0
+const progressListeners = new Set<() => void>()
+
+function subscribeProgress(listener: () => void): () => void {
+  progressListeners.add(listener)
+  return () => {
+    progressListeners.delete(listener)
+  }
+}
+
+function getProgressSnapshot(): number {
+  return audioProgress
+}
+
+function setProgress(next: number): void {
+  const value = Number.isFinite(next) && next > 0 ? next : 0
+  if (value === audioProgress) return
+  audioProgress = value
+  for (const listener of progressListeners) listener()
+}
+
+/** Tiempo de reproducción actual, aislado del resto del árbol (Task B7). */
+export function useAudioProgress(): number {
+  return useSyncExternalStore(
+    subscribeProgress,
+    getProgressSnapshot,
+    getProgressSnapshot,
+  )
+}
+
 export function AudioProvider({ children }: { children: ReactNode }) {
   // Una sola instancia de <audio>, creada perezosamente (sólo en cliente).
   const audioRef = useRef<HTMLAudioElement | null>(null)
@@ -47,15 +91,15 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const [volume, setVolumeState] = useLocalStorage<number>(
     VOLUME_KEY,
     INITIAL_VOLUME,
+    isVolume,
   )
   const [isMuted, setIsMuted] = useState(false)
   const [duration, setDuration] = useState(0)
-  const [currentTime, setCurrentTime] = useState(0)
+  const [error, setError] = useState(false)
 
   // Refs para evitar closures obsoletas dentro de los manejadores del elemento.
   const trackIndexRef = useRef(0)
   const loadedSrcRef = useRef('')
-  const errorCountRef = useRef(0)
 
   // Avanza/envuelve el índice de forma síncrona (ref + state).
   const goToIndex = useCallback((index: number) => {
@@ -71,10 +115,11 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     if (!audio) return
     const track = tracks[trackIndexRef.current]
     if (!track) return
+    setError(false)
     if (loadedSrcRef.current !== track.src) {
       audio.src = track.src
       loadedSrcRef.current = track.src
-      setCurrentTime(0)
+      setProgress(0)
       setDuration(0)
     }
     const maybePromise = audio.play()
@@ -135,20 +180,9 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     audio.muted = isMuted
   }, [volume, isMuted])
 
-  // Cuando cambia el índice, carga el nuevo src (para que los metadatos
-  // queden listos aunque esté en pausa). La reproducción la dispara play().
-  useEffect(() => {
-    const audio = audioRef.current
-    if (!audio) return
-    const track = tracks[trackIndex]
-    if (!track) return
-    if (loadedSrcRef.current !== track.src) {
-      audio.src = track.src
-      loadedSrcRef.current = track.src
-      setCurrentTime(0)
-      setDuration(0)
-    }
-  }, [trackIndex])
+  // No se asigna `src` al montar ni al cambiar de pista: el audio no hace
+  // ninguna petición de red hasta que el usuario pulsa play (o la narración/
+  // deep-link pide reproducción). `play()` es quien fija el `src`.
 
   // Adjunta el elemento y sus listeners una sola vez.
   useEffect(() => {
@@ -156,14 +190,14 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     if (!audio) return
 
     audio.loop = false
-    audio.preload = 'metadata'
+    audio.preload = 'none'
 
     const onPlay = () => {
       setIsPlaying(true)
-      errorCountRef.current = 0
+      setError(false)
     }
     const onPause = () => setIsPlaying(false)
-    const onTimeUpdate = () => setCurrentTime(audio.currentTime || 0)
+    const onTimeUpdate = () => setProgress(audio.currentTime || 0)
     const onLoadedMetadata = () => setDuration(audio.duration || 0)
     const onDurationChange = () => setDuration(audio.duration || 0)
     const onVolumeChange = () => setIsMuted(audio.muted)
@@ -175,14 +209,13 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     }
 
     const onError = () => {
-      errorCountRef.current += 1
-      // Si TODAS fallan, paramos para evitar un bucle infinito.
-      if (errorCountRef.current >= tracks.length) {
-        setIsPlaying(false)
-        return
-      }
-      goToIndex(trackIndexRef.current + 1)
-      play()
+      // Un fallo de pista NO rota en silencio: se detiene la reproducción, se
+      // avisa en la UI y el visualizador cae al fallback (Review Focus #4).
+      setIsPlaying(false)
+      setError(true)
+      audio.pause()
+      // Permitir reintentar la misma pista en el próximo play.
+      loadedSrcRef.current = ''
     }
 
     audio.addEventListener('play', onPlay)
@@ -206,7 +239,10 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     }
   }, [goToIndex, play])
 
-  const currentTrack = tracks[trackIndex]
+  // `tracks` es una tupla no vacía: `tracks[0]` cubre el caso (inalcanzable) de
+  // un índice fuera de rango sin recurrir a aserciones.
+  const currentTrack = tracks[trackIndex] ?? tracks[0]
+  const audioEl = audioRef.current
 
   const value = useMemo<AudioContextValue>(
     () => ({
@@ -216,7 +252,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       volume,
       isMuted,
       duration,
-      currentTime,
+      error,
+      audioEl,
       play,
       pause,
       togglePlay,
@@ -233,7 +270,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       volume,
       isMuted,
       duration,
-      currentTime,
+      error,
+      audioEl,
       play,
       pause,
       togglePlay,

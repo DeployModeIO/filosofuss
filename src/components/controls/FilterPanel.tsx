@@ -1,22 +1,20 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { SlidersHorizontal, X } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'framer-motion'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { cn } from '@/lib/utils'
 import { allEras, allSchools, allTags } from '@/data/quotes'
+import { localizeEra, localizeSchool } from '@/data/philosophers'
 import { useApp } from '@/context/AppContext'
-
-const reduceMotion =
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
+import type { Tag } from '@/types'
 
 export interface FilterPanelProps {
   selectedEra: string | null
   selectedSchool: string | null
-  selectedTag: string | null
+  selectedTag: Tag | null
   onEra: (v: string | null) => void
   onSchool: (v: string | null) => void
-  onTag: (v: string | null) => void
+  onTag: (v: Tag | null) => void
   onClear: () => void
 }
 
@@ -46,20 +44,32 @@ function Pill({
   )
 }
 
-function FilterGroup({
+/**
+ * Grupo de filtros con semántica de grupo (UX-18): los pills se anuncian
+ * agrupados bajo un `legend` visual enlazado con `aria-labelledby`. Las
+ * opciones conservan su valor canónico (clave de filtro) y solo la etiqueta
+ * visible se localiza.
+ */
+function FilterGroup<T extends string>({
   title,
   options,
   selected,
   onSelect,
+  labelFor,
 }: {
   title: string
-  options: string[]
-  selected: string | null
-  onSelect: (v: string | null) => void
+  options: readonly T[]
+  selected: T | null
+  onSelect: (v: T | null) => void
+  labelFor: (v: T) => string
 }) {
+  const labelId = useId()
   return (
-    <div className="flex flex-col gap-2">
-      <span className="text-xs font-semibold uppercase tracking-wider text-muted">
+    <div role="group" aria-labelledby={labelId} className="flex flex-col gap-2">
+      <span
+        id={labelId}
+        className="text-xs font-semibold uppercase tracking-wider text-muted"
+      >
         {title}
       </span>
       <div className="flex flex-wrap gap-2">
@@ -69,7 +79,7 @@ function FilterGroup({
             active={selected === opt}
             onClick={() => onSelect(selected === opt ? null : opt)}
           >
-            {opt}
+            {labelFor(opt)}
           </Pill>
         ))}
       </div>
@@ -86,7 +96,8 @@ export default function FilterPanel({
   onTag,
   onClear,
 }: FilterPanelProps) {
-  const { t } = useApp()
+  const { t, locale } = useApp()
+  const reduceMotion = usePrefersReducedMotion()
   const [open, setOpen] = useState(false)
   const activeCount = [selectedEra, selectedSchool, selectedTag].filter(
     Boolean,
@@ -100,18 +111,21 @@ export default function FilterPanel({
         options={allEras}
         selected={selectedEra}
         onSelect={onEra}
+        labelFor={(era) => localizeEra(era, locale)}
       />
       <FilterGroup
         title={t('filter.school')}
         options={allSchools}
         selected={selectedSchool}
         onSelect={onSchool}
+        labelFor={(school) => localizeSchool(school, locale)}
       />
       <FilterGroup
         title={t('filter.tema')}
         options={allTags}
         selected={selectedTag}
         onSelect={onTag}
+        labelFor={(tag) => t(`tag.${tag}`)}
       />
       {hasFilters && (
         <button
@@ -119,7 +133,7 @@ export default function FilterPanel({
           onClick={onClear}
           className="btn-ghost self-start px-4 py-2 text-sm"
         >
-          <X className="h-4 w-4" />
+          <X className="h-4 w-4" aria-hidden="true" />
           {t('filter.clear')}
         </button>
       )}
@@ -134,7 +148,7 @@ export default function FilterPanel({
         aria-expanded={open}
         className="btn-ghost self-start px-4 py-2 text-sm sm:hidden"
       >
-        <SlidersHorizontal className="h-4 w-4" />
+        <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
         {t('filter.label')}
         {hasFilters && (
           <span className="ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent-2 px-1.5 text-xs text-[#0a0a12]">
@@ -149,7 +163,7 @@ export default function FilterPanel({
       {/* Móvil: colapsable */}
       <AnimatePresence initial={false}>
         {open && (
-          <motion.div
+          <m.div
             key="mobile-filters"
             className="flex flex-col gap-4 overflow-hidden sm:hidden"
             initial={reduceMotion ? { opacity: 1 } : { height: 0, opacity: 0 }}
@@ -160,7 +174,7 @@ export default function FilterPanel({
             transition={{ duration: reduceMotion ? 0 : 0.3, ease: 'easeInOut' }}
           >
             {groups}
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

@@ -2,24 +2,28 @@
  * Filosofuss — Service Worker (PWA, soporte offline)
  * JS plano, sin dependencias externas. Se sirve desde /sw.js
  * Estrategia:
- *   - Precacheo del app shell al instalar.
- *   - Navegaciones: network-first (fallback a /index.html y /).
- *   - Assets del mismo origen (JS/CSS/img/audio): stale-while-revalidate.
- *   - Google Fonts: network-first con caché de respaldo.
+ *   - Precacheo del app shell + página offline al instalar.
+ *   - Navegaciones: network-first (fallback al shell cacheado y a
+ *     /offline.html). No cachea errores ni respuestas no-HTML.
+ *   - Assets del mismo origen (JS/CSS/img): stale-while-revalidate.
+ *   - Audio (.m4a/.mp3): on-demand, fuera del precache (SWR).
+ *   - Resto de peticiones (cross-origin, p. ej. Google Fonts): directas.
  * ===================================================================== */
 
-const CACHE = 'filosofuss-v1';
+// Nombre de caché versionado por build. `public/` es estático, así que la
+// versión se mantiene aquí: al publicar una release, actualiza BUILD (fecha o
+// hash) para invalidar las cachés antiguas (el `activate` ya borra las demás).
+const BUILD = '2026-10-01';
+const CACHE = `filosofuss-${BUILD}`;
 
 // App shell que se precachea al instalar. Rutas absolutas (hosting en raíz).
+// El audio (.m4a/.mp3) NO se precachea: se cachea on-demand al reproducir (SWR).
+// Presupuesto de instalación: ≤1 MiB (HTML shell + manifest + página offline).
 const PRECACHE_URLS = [
   '/',
   '/index.html',
   '/manifest.webmanifest',
-  '/audio/emand_edroff-ishopanishad_intimate-480016.mp3',
-  '/audio/konstantinpazuzustudio-rain-on-the-roof-neoclassical-piano-514674.mp3',
-  '/audio/meditativetiger-zen-master-bowl-wisdom-388631.mp3',
-  '/audio/prettyjohn1-calming-zen-537655.mp3',
-  '/audio/raspberrymusic-the-way-to-yourself-piano-cinematic-spiritual-410697.mp3',
+  '/offline.html',
 ];
 
 // --- Instalación: precacheo del app shell. ---------------------------
@@ -58,7 +62,10 @@ self.addEventListener('fetch', (event) => {
   // Solo gestionamos GET. El resto pasa al navegador.
   if (request.method !== 'GET') return;
 
+  // El propio SW nunca se cachea (SEC-27/W-02): siempre se sirve de la red.
   const url = new URL(request.url);
+  if (url.pathname.endsWith('/sw.js')) return;
+
   const sameOrigin = url.origin === self.location.origin;
 
   // 1) Navegaciones (carga de documentos HTML): network-first.
@@ -67,45 +74,30 @@ self.addEventListener('fetch', (event) => {
       (async () => {
         try {
           const fresh = await fetch(request);
-          const cache = await caches.open(CACHE);
-          cache.put('/index.html', fresh.clone()).catch(() => {});
-          return fresh;
-        } catch (err) {
-          // Sin red: servimos el app shell cacheado.
-          const cache = await caches.open(CACHE);
-          return (
-            (await cache.match('/index.html')) ||
-            (await cache.match('/')) ||
-            fetch(request).catch(() => Response.error())
-          );
-        }
-      })()
-    );
-    return;
-  }
-
-  // 2) Google Fonts: network-first con caché de respaldo (offline tras 1ª visita).
-  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
-    event.respondWith(
-      (async () => {
-        try {
-          const fresh = await fetch(request);
-          if (fresh && fresh.ok) {
+          // Solo cacheamos respuestas correctas y de tipo HTML (SEC-26/W-01):
+          // nunca errores, redirecciones ni respuestas opacas como app shell.
+          const contentType = fresh.headers.get('content-type') || '';
+          if (fresh.ok && contentType.includes('text/html')) {
             const cache = await caches.open(CACHE);
-            cache.put(request, fresh.clone()).catch(() => {});
+            cache.put('/index.html', fresh.clone()).catch(() => {});
           }
           return fresh;
         } catch (err) {
+          // Sin red: app shell cacheado o página offline dedicada.
           const cache = await caches.open(CACHE);
-          const cached = await cache.match(request);
-          return cached || fetch(request).catch(() => Response.error());
+          const cached =
+            (await cache.match('/index.html')) ||
+            (await cache.match('/')) ||
+            (await cache.match('/offline.html'));
+          if (cached) return cached;
+          return Response.error();
         }
       })()
     );
     return;
   }
 
-  // 3) Recursos del mismo origen (JS/CSS/imagen/audio): stale-while-revalidate.
+  // 2) Recursos del mismo origen (JS/CSS/imagen/audio): stale-while-revalidate.
   if (sameOrigin) {
     event.respondWith(
       (async () => {
@@ -127,6 +119,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 4) Resto de peticiones (cross-origin no gestionadas): navegador normal.
-  //    No usamos event.respondWith: la petición pasa a la red por defecto.
+  // 3) Resto de peticiones (cross-origin no gestionadas, p. ej. Google Fonts):
+  //    no usamos event.respondWith: la petición pasa a la red por defecto.
 });

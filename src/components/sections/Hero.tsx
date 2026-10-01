@@ -1,33 +1,44 @@
-import { useState } from 'react'
-import { motion, type Variants } from 'framer-motion'
+import { useRef, useState } from 'react'
+import { m, useScroll, useTransform } from 'framer-motion'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { Link } from 'react-router-dom'
 import { ArrowRight, ChevronDown, Quote, Sparkles, Users } from 'lucide-react'
-import { getPhilosopherById, getRandomQuote } from '@/data/quotes'
+import { getPhilosopherById, getQuoteText, getRandomQuote } from '@/data/quotes'
+import { localizePhilosopher } from '@/data/philosophers'
 import { useApp } from '@/context/AppContext'
 import AnimatedQuote from '@/components/quotes/AnimatedQuote'
 
-const reduceMotion =
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-const container: Variants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } },
-}
-
-const item: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
-}
+const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
 
 export default function Hero() {
-  const { t } = useApp()
+  const reduceMotion = usePrefersReducedMotion()
+  const { t, locale } = useApp()
   const [featured] = useState(() => getRandomQuote())
   const philosopher = getPhilosopherById(featured.philosopherId)
+  const display = philosopher ? localizePhilosopher(philosopher, locale) : undefined
+
+  // Parallax sutil de la cita (±12 px totales, §3.3). No se aplica a fondos
+  // con blur; solo al wrapper del bloque de cita.
+  const sectionRef = useRef<HTMLElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'end start'],
+  })
+  const parallaxY = useTransform(scrollYProgress, [0, 1], [6, -6])
+
+  // Una sola secuencia de carga: máscara de cita → hairline → atribución →
+  // subtítulo → CTAs. `initial={false}` bajo reduced-motion (sin animación).
+  const fadeUp = (delay: number) => ({
+    initial: reduceMotion ? false : { opacity: 0, y: 12 },
+    animate: reduceMotion ? false : { opacity: 1, y: 0 },
+    transition: { delay: reduceMotion ? 0 : delay, duration: 0.4, ease: EASE },
+  })
 
   return (
-    <section className="relative flex min-h-[92vh] w-full items-center justify-center overflow-hidden px-5 py-24 sm:px-8">
+    <section
+      ref={sectionRef}
+      className="relative flex min-h-[92svh] w-full items-center justify-center overflow-hidden px-5 py-24 sm:px-8"
+    >
       {/* Elementos decorativos */}
       <Quote
         aria-hidden="true"
@@ -42,54 +53,63 @@ export default function Hero() {
         className="pointer-events-none absolute right-[20%] top-[24%] h-8 w-8 text-accent-3/40 animate-float-slow"
       />
 
-      <motion.div
-        variants={container}
-        initial={reduceMotion ? 'show' : 'hidden'}
-        animate="show"
-        className="relative z-10 mx-auto flex max-w-4xl flex-col items-center text-center"
-      >
+      <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center text-center">
         {/* Eyebrow — marca */}
-        <motion.p
-          variants={item}
+        <m.p
+          {...fadeUp(0)}
           className="mb-8 inline-flex items-center gap-2 rounded-full border border-line-soft bg-glass px-4 py-1.5 font-logo text-xs uppercase tracking-[0.3em] text-accent sm:text-sm"
         >
           <Sparkles className="h-4 w-4" />
           Filosofuss
-        </motion.p>
+        </m.p>
 
-        {/* Cita monumental */}
-        <AnimatedQuote
-          text={featured.text}
-          className="font-serif text-3xl italic leading-snug text-content sm:text-5xl lg:text-6xl"
+        {/* Hairline gold → copper → ember, dibujada con scaleX */}
+        <m.div
+          aria-hidden="true"
+          className="mb-8 h-px w-44 origin-center bg-gradient-to-r from-gold via-copper to-ember sm:w-56"
+          initial={reduceMotion ? false : { scaleX: 0 }}
+          animate={reduceMotion ? false : { scaleX: 1 }}
+          transition={{ delay: reduceMotion ? 0 : 0.55, duration: 0.4, ease: EASE }}
         />
 
+        {/* Cita monumental — revelado por máscara + parallax (Δ ≤ 12 px) */}
+        <m.div
+          style={reduceMotion ? {} : { y: parallaxY }}
+          className="[will-change:transform]"
+        >
+          <AnimatedQuote
+            text={getQuoteText(featured, locale)}
+            className="font-serif text-3xl italic leading-snug text-content sm:text-5xl lg:text-6xl"
+          />
+        </m.div>
+
         {/* Atribución */}
-        <motion.div
-          variants={item}
+        <m.div
+          {...fadeUp(0.8)}
           className="mt-8 flex flex-col items-center gap-1"
         >
-          {philosopher && (
+          {display && (
             <>
               <span className="font-display text-xl text-accent sm:text-2xl">
-                {philosopher.name}
+                {display.name}
               </span>
               <span className="text-sm text-muted">
-                {philosopher.era} · {philosopher.school}
+                {display.era} · {display.school}
               </span>
             </>
           )}
-        </motion.div>
+        </m.div>
 
-        <motion.p
-          variants={item}
+        <m.p
+          {...fadeUp(0.9)}
           className="mt-6 max-w-xl font-serif text-base italic text-muted sm:text-lg"
         >
           {t('hero.subtitle')}
-        </motion.p>
+        </m.p>
 
         {/* CTAs */}
-        <motion.div
-          variants={item}
+        <m.div
+          {...fadeUp(1)}
           className="mt-10 flex flex-col items-center gap-4 sm:flex-row"
         >
           <Link to="/explorar" className="btn-primary text-base">
@@ -100,8 +120,8 @@ export default function Hero() {
             <Users className="h-5 w-5" />
             {t('hero.meetPhilosophers')}
           </Link>
-        </motion.div>
-      </motion.div>
+        </m.div>
+      </div>
 
       {/* Indicador de scroll */}
       <div
@@ -115,4 +135,3 @@ export default function Hero() {
     </section>
   )
 }
-
