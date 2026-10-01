@@ -192,7 +192,7 @@ function printFfmpegInstructions() {
 // ----------------------------------------------------------------------------
 //  GENERACIÓN DE UN .m4a PARA UNA CITA (edge-tts → MP3 temporal → ffmpeg → AAC)
 // ----------------------------------------------------------------------------
-function generateOne({ id, text }, outPath, runner) {
+function generateOne({ text }, outPath, runner) {
   const tmpPath = outPath.replace(new RegExp(`\\${AUDIO_EXT}$`), TMP_MEDIA_EXT)
   return new Promise((resolveGen) => {
     const child = spawn(

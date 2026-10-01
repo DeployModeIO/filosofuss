@@ -13,6 +13,9 @@ node_modules
 dist
 dist-ssr
 
+# Cobertura de tests (Vitest)
+coverage
+
 # Local env files
 *.local
 .env
