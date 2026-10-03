@@ -3,6 +3,26 @@ import type { ReactNode } from 'react'
 import { useLocalStorage } from '@/lib/storage'
 import { translate, type Locale } from '@/i18n/strings'
 
+// Migración única 03/10: el default histórico era dark; usuarios que nunca
+// eligieron tema pasan a claro (preferencia global). Las elecciones explícitas
+// POST-migración se respetan. Debe ejecutarse antes del primer init de
+// useLocalStorage: al ser de módulo, corre en el import, anterior al render
+// del provider, que es cuando el hook lee (useState perezoso).
+const THEME_MIGRATION_KEY = 'filosofuss:theme-migrated-v2'
+if (typeof window !== 'undefined') {
+  try {
+    if (!window.localStorage.getItem(THEME_MIGRATION_KEY)) {
+      const raw = window.localStorage.getItem('filosofuss:theme')
+      if (raw && JSON.parse(raw) === 'dark') {
+        window.localStorage.setItem('filosofuss:theme', JSON.stringify('light'))
+      }
+      window.localStorage.setItem(THEME_MIGRATION_KEY, '1')
+    }
+  } catch {
+    /* localStorage no disponible */
+  }
+}
+
 export type Theme = 'dark' | 'light' | 'paper'
 
 export interface AppContextValue {
