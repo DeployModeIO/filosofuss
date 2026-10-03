@@ -2,6 +2,7 @@ import { memo, useState } from 'react'
 import type { MouseEvent, ReactNode } from 'react'
 import { AnimatePresence, m, useMotionTemplate, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
+import { useDocumentTheme, type ThemeMode } from '@/hooks/useDocumentTheme'
 import { spring } from '@/lib/variants'
 import { announce } from '@/components/ui/StatusAnnouncer'
 import type { LucideIcon } from 'lucide-react'
@@ -34,6 +35,15 @@ const ICON_SWAP = {
   initial: { opacity: 0, scale: 0.5 },
   animate: { opacity: 1, scale: 1 },
   exit: { opacity: 0, scale: 0.5 },
+}
+
+// Spotlight por tema: dark conserva el oro histórico exacto; en light/paper el
+// oro claro casi no se ve sobre fondo claro, así que el resaltado se pinta con
+// el oro profundo del token a 0.10 (tinte cálido sutil, coherente con aurora).
+const SPOTLIGHT_INK: Record<ThemeMode, string> = {
+  dark: 'rgba(201, 169, 106, 0.12)',
+  light: 'rgba(125, 90, 28, 0.1)',
+  paper: 'rgba(122, 86, 28, 0.1)',
 }
 
 type Translate = (key: string, vars?: Record<string, string | number>) => string
@@ -361,6 +371,8 @@ function RichCardFrame({
 }) {
   const prefersReducedMotion = usePrefersReducedMotion()
   const isFeatured = variant === 'featured'
+  // Tema activo desde <html> para la tinta del spotlight.
+  const themeMode = useDocumentTheme()
 
   const px = useMotionValue(0)
   const py = useMotionValue(0)
@@ -375,7 +387,7 @@ function RichCardFrame({
 
   const sx = useMotionValue(50)
   const sy = useMotionValue(50)
-  const spotlight = useMotionTemplate`radial-gradient(360px circle at ${sx}% ${sy}%, rgba(201, 169, 106, 0.12), transparent 65%)`
+  const spotlight = useMotionTemplate`radial-gradient(360px circle at ${sx}% ${sy}%, ${SPOTLIGHT_INK[themeMode]}, transparent 65%)`
 
   const handlePointerMove = (e: MouseEvent<HTMLDivElement>) => {
     if (prefersReducedMotion) return
