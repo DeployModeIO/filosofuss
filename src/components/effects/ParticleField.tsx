@@ -18,21 +18,27 @@ interface Particle {
 // profundos de los tokens, para que el dorado se vea sobre fondo claro.
 const PALETTES: Record<ThemeMode, string[]> = {
   dark: ['rgba(201,169,106,', 'rgba(176,113,63,', 'rgba(122,46,77,'],
-  light: ['rgba(125,90,28,', 'rgba(138,90,47,', 'rgba(154,74,42,'],
-  paper: ['rgba(122,86,28,', 'rgba(107,74,42,', 'rgba(138,58,42,'],
+  light: ['rgba(168,112,20,', 'rgba(138,90,47,', 'rgba(154,74,42,'],
+  paper: ['rgba(158,102,22,', 'rgba(107,74,42,', 'rgba(138,58,42,'],
 }
 
-// Rango de alpha [base, span] por tema: dark conserva 0.2–0.7; light/paper
-// usan 0.35–0.75 (visibles sin manchar el fondo claro).
+// Rango de alpha [base, span] por tema: dark conserva 0.2–0.7 (intacto);
+// light/paper suben a 0.6–1.0: con 0.35–0.75 el dorado sobre #f9f7f3 daba
+// ~2.1:1 de contraste y resultaba casi imperceptible.
 const ALPHA_RANGE: Record<ThemeMode, [number, number]> = {
   dark: [0.2, 0.5],
-  light: [0.35, 0.4],
-  paper: [0.35, 0.4],
+  light: [0.6, 0.4],
+  paper: [0.6, 0.4],
 }
 
 function createParticles(width: number, height: number, theme: ThemeMode): Particle[] {
-  // Cap duro de 40 partículas (Task C5 / P-14), antes hasta 70.
-  const count = Math.min(40, Math.max(16, Math.floor(width / 32)))
+  // Cap de partículas (P-14): en dark se conserva el cap duro de 40 con
+  // width/32, exacto como estaba; en light/paper se sube a 56 con width/24
+  // porque sobre fondo claro hacen falta más puntos para el contraste.
+  const count =
+    theme === 'dark'
+      ? Math.min(40, Math.max(16, Math.floor(width / 32)))
+      : Math.min(56, Math.max(16, Math.floor(width / 24)))
   const palette = PALETTES[theme]
   const fallback = palette[0] ?? 'rgba(201,169,106,'
   const [alphaBase, alphaSpan] = ALPHA_RANGE[theme]
@@ -41,7 +47,9 @@ function createParticles(width: number, height: number, theme: ThemeMode): Parti
     particles.push({
       x: Math.random() * width,
       y: Math.random() * height,
-      r: Math.random() * 2.2 + 0.6,
+      // Radio por tema: dark conserva la fórmula exacta (0.6–2.8); en
+      // light/paper 1.8–4.8 CSS px para un Ø efectivo de 5–6 px o más.
+      r: theme === 'dark' ? Math.random() * 2.2 + 0.6 : Math.random() * 3 + 1.8,
       vy: -(Math.random() * 0.35 + 0.12),
       sway: Math.random() * 0.6 + 0.2,
       swaySpeed: Math.random() * 0.6 + 0.3,
