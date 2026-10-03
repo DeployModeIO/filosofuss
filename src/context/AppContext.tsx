@@ -29,12 +29,10 @@ export interface AppContextValue {
 
 const AppContext = createContext<AppContextValue | undefined>(undefined)
 
-const prefersLight =
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-color-scheme: light)').matches
-
-const DEFAULT_THEME: Theme = prefersLight ? 'light' : 'dark'
+// Preferencia GLOBAL del usuario: el modo por defecto en todos los proyectos es
+// CLARO (patrón brigada-nfpa10). El toggle dark→light→paper y el valor
+// persistido en localStorage siguen mandando sobre este default.
+const DEFAULT_THEME: Theme = 'light'
 
 // Guardas de forma para los valores persistidos (COD-04): un localStorage
 // corrupto o de otra versión degrada al valor por defecto en lugar de violar

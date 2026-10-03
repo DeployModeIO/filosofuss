@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react'
 import type { MotionStyle } from 'framer-motion'
 import { m } from 'framer-motion'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
+import { useDocumentTheme, type ThemeMode } from '@/hooks/useDocumentTheme'
 
 interface AuroraBlob {
   bg: string
@@ -42,22 +43,46 @@ const BLOBS: AuroraBlob[] = [
   },
 ]
 
+// Tintas por tema: `dark` conserva EXACTAMENTE los gradientes de BLOBS; light
+// y paper sustituyen los oros claros por los oros profundos del token a menor
+// fuerza — sobre fondo claro un alfa bajo se lee como aguatinta elegante.
+const THEME_BGS: Partial<Record<ThemeMode, string[]>> = {
+  light: [
+    'radial-gradient(circle at center, rgba(125,90,28,0.22), rgba(125,90,28,0) 62%)',
+    'radial-gradient(circle at center, rgba(154,74,42,0.2), rgba(154,74,42,0) 60%)',
+  ],
+  paper: [
+    'radial-gradient(circle at center, rgba(122,86,28,0.22), rgba(122,86,28,0) 62%)',
+    'radial-gradient(circle at center, rgba(138,58,42,0.2), rgba(138,58,42,0) 60%)',
+  ],
+}
+
+// Opacidad del layer de blobs por tema (dark = 0.45 histórico; en claro sube
+// algo para compensar los alfas bajos de los gradientes).
+const THEME_OPACITY: Record<ThemeMode, number> = { dark: 0.45, light: 0.55, paper: 0.55 }
+
 // La intersección permite asignar el mismo objeto tanto a un `style` de DOM
 // (`CSSProperties`) como al `style` de un componente de Framer Motion
 // (`MotionStyle`), cuyos índices de propiedad no admiten `undefined`.
-const BLOB_STYLE = (blob: AuroraBlob): CSSProperties & MotionStyle => ({
+const BLOB_STYLE = (
+  blob: AuroraBlob,
+  index: number,
+  theme: ThemeMode,
+): CSSProperties & MotionStyle => ({
   width: blob.size,
   height: blob.size,
   left: blob.left,
   top: blob.top,
-  background: blob.bg,
-  opacity: 0.45,
+  background: THEME_BGS[theme]?.[index] ?? blob.bg,
+  opacity: THEME_OPACITY[theme],
   willChange: 'transform',
   contain: 'paint',
 })
 
 export default function AuroraBackground() {
   const prefersReducedMotion = usePrefersReducedMotion()
+  // Tema activo desde <html>: sólo cambia tintas/opacidad, nunca la geometría.
+  const themeMode = useDocumentTheme()
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
       {BLOBS.map((blob, i) =>
@@ -65,13 +90,13 @@ export default function AuroraBackground() {
           <div
             key={i}
             className="absolute rounded-full"
-            style={BLOB_STYLE(blob)}
+            style={BLOB_STYLE(blob, i, themeMode)}
           />
         ) : (
           <m.div
             key={i}
             className="absolute rounded-full"
-            style={BLOB_STYLE(blob)}
+            style={BLOB_STYLE(blob, i, themeMode)}
             animate={{ x: blob.x, y: blob.y, scale: blob.scale }}
             transition={{ duration: blob.duration, repeat: Infinity, ease: 'easeInOut' }}
           />

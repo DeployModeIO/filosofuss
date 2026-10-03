@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
+import { useDocumentTheme, type ThemeMode } from '@/hooks/useDocumentTheme'
 
 interface Particle {
   x: number
@@ -13,12 +14,28 @@ interface Particle {
   color: string
 }
 
-const COLORS = ['rgba(201,169,106,', 'rgba(176,113,63,', 'rgba(122,46,77,']
-const FALLBACK_COLOR = COLORS[0] ?? 'rgba(201,169,106,'
+// Paletas por tema: dark = las históricas (inertes); light/paper = los oros
+// profundos de los tokens, para que el dorado se vea sobre fondo claro.
+const PALETTES: Record<ThemeMode, string[]> = {
+  dark: ['rgba(201,169,106,', 'rgba(176,113,63,', 'rgba(122,46,77,'],
+  light: ['rgba(125,90,28,', 'rgba(138,90,47,', 'rgba(154,74,42,'],
+  paper: ['rgba(122,86,28,', 'rgba(107,74,42,', 'rgba(138,58,42,'],
+}
 
-function createParticles(width: number, height: number): Particle[] {
+// Rango de alpha [base, span] por tema: dark conserva 0.2–0.7; light/paper
+// usan 0.35–0.75 (visibles sin manchar el fondo claro).
+const ALPHA_RANGE: Record<ThemeMode, [number, number]> = {
+  dark: [0.2, 0.5],
+  light: [0.35, 0.4],
+  paper: [0.35, 0.4],
+}
+
+function createParticles(width: number, height: number, theme: ThemeMode): Particle[] {
   // Cap duro de 40 partículas (Task C5 / P-14), antes hasta 70.
   const count = Math.min(40, Math.max(16, Math.floor(width / 32)))
+  const palette = PALETTES[theme]
+  const fallback = palette[0] ?? 'rgba(201,169,106,'
+  const [alphaBase, alphaSpan] = ALPHA_RANGE[theme]
   const particles: Particle[] = []
   for (let i = 0; i < count; i++) {
     particles.push({
@@ -29,8 +46,8 @@ function createParticles(width: number, height: number): Particle[] {
       sway: Math.random() * 0.6 + 0.2,
       swaySpeed: Math.random() * 0.6 + 0.3,
       phase: Math.random() * Math.PI * 2,
-      alpha: Math.random() * 0.5 + 0.2,
-      color: COLORS[Math.floor(Math.random() * COLORS.length)] ?? FALLBACK_COLOR,
+      alpha: Math.random() * alphaSpan + alphaBase,
+      color: palette[Math.floor(Math.random() * palette.length)] ?? fallback,
     })
   }
   return particles
@@ -38,6 +55,9 @@ function createParticles(width: number, height: number): Particle[] {
 
 export default function ParticleField() {
   const reduceMotion = usePrefersReducedMotion()
+  // Tema observado desde <html>: al cambiar, este efecto se re-ejecuta y
+  // regenera las partículas con la paleta/alpha del tema nuevo.
+  const themeMode = useDocumentTheme()
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -61,7 +81,7 @@ export default function ParticleField() {
       canvas.style.width = `${width}px`
       canvas.style.height = `${height}px`
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      particles = createParticles(width, height)
+      particles = createParticles(width, height, themeMode)
     }
 
     const draw = (now: number) => {
@@ -131,7 +151,7 @@ export default function ParticleField() {
       window.removeEventListener('resize', onResize)
       document.removeEventListener('visibilitychange', onVisibility)
     }
-  }, [reduceMotion])
+  }, [reduceMotion, themeMode])
 
   return (
     <canvas
